@@ -1,0 +1,218 @@
+{
+  "pos": {
+
+  },
+  "nodes": [
+    {
+      "id": "basemesh",
+      "nodetype": "Mesh",
+      "param": {
+        "shape": "cube",
+        "tuberatio": 0.1
+      },
+      "joint": {}
+    },
+    {
+      "id": "countvalue",
+      "nodetype": "Value",
+      "param": {
+        "value": 200
+      },
+      "joint": {}
+    },
+    {
+      "id": "inst",
+      "nodetype": "CreateInstance",
+      "param": {
+        "evalonce": true,
+        "default": {
+          "count": 200
+        }
+      },
+      "joint": {
+        "count": "countvalue.result",
+        "mesh": "basemesh.mesh",
+        "material": "newnode3.material"
+      }
+    },
+    {
+      "id": "instmtx",
+      "nodetype": "InstanceMatrix",
+      "param": {},
+      "joint": {
+        "instance": "inst.instance",
+        "scale": "newnode4.result",
+        "euler": "newnode5.result",
+        "translate": "newnode6.result"
+      }
+    },
+    {
+      "id": "instcol",
+      "nodetype": "InstanceColor",
+      "param": {},
+      "joint": {
+        "instance": "instmtx.instance",
+        "hsl": "newnode7.result"
+      }
+    },
+    {
+      "id": "root",
+      "nodetype": "Output",
+      "param": {},
+      "joint": {
+        "mesh": "instcol.instance"
+      }
+    },
+    {
+      "id": "newnode2",
+      "nodetype": "Input",
+      "param": {
+        "input": {
+          "result": {
+            "caption": "input",
+            "value": 1
+          }
+        }
+      },
+      "joint": {}
+    },
+    {
+      "id": "newnode3",
+      "nodetype": "Material",
+      "param": {
+        "roughness": 0.832,
+        "metalness": 0.067
+      },
+      "joint": {}
+    },
+    {
+      "id": "newnode4",
+      "nodetype": "Math",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "(1-a)*0.8+0.2"
+          }
+        }
+      },
+      "joint": {
+        "a": "inst.findex"
+      }
+    },
+    {
+      "id": "newnode5",
+      "nodetype": "Math",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "0",
+              "Time/b/400*a",
+              "0"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "b": "newnode2.result",
+        "a": "inst.findex"
+      }
+    },
+    {
+      "id": "newnode6",
+      "nodetype": "Math",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "0",
+              "a*2",
+              "0"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "inst.findex"
+      }
+    },
+    {
+      "id": "newnode7",
+      "nodetype": "Math",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "a-Time/20000",
+              "0.5",
+              "0.5"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "inst.findex"
+      }
+    }
+  ]
+}
