@@ -26,7 +26,9 @@ GNode.createNode = function(type,param,id) {
 //make node tree from data
 GNode.mknode = function(data) {
 	const nt = new GNode.Nodetree()
-	nt.addnodes(data)
+	if(nt.addnodes(data)==null) {
+		console.log(GNode.emsg )
+	}
 	return nt 
 }
 // clear eval flag
@@ -106,7 +108,7 @@ GNode.Node.prototype._eval = function(time) {
 		try {
 			if(this.eval) this.eval(time)
 		} catch(err) {
-			throw(`node eval error at ${this.id}: ${err}`)
+			throw(`node eval error at ${this.name}: ${err}`)
 			return null 
 		}
 		return true
@@ -203,7 +205,10 @@ GNode.Nodetree.prototype.addnodes = function(data) {
 	for(let i=0;i<data.length;i++) {
 		const n = data[i]
 		const ni = GNode.createNode(n.nodetype,n.param,n.id)
-		if(!ni) return null 
+		if(!ni) {
+			console.log("node init err "+GNode.emsg)
+//			continue
+		}
 		ni.name = n.name 
 		nodes.push(ni)
 		this.setnode(ni.id,ni) 
@@ -264,7 +269,7 @@ GNode.Nodetree.prototype.eval = function() {
 		if(node.nodetype=="Output") {
 			try{
 				node._eval(time)
-			}catch(err) {
+			}catch(err) {		//catch runtime error
 				GNode.emsg = err 
 				return null 
 			} 
@@ -667,11 +672,17 @@ GNode.regist = function(THREE) {
 			`
 			try{
 				this.func = new Function("__ic","allinput","lastdata",fc)
-			} catch(err){ throw("math function "+err)}
-
+			} catch(err){ 
+				this.err = err 
+				this.func = null
+//				throw("math function "+err
+			}
 		},{
 			eval:function(time) {
-				if(this.func===undefined)return 
+				if(this.func===null) {
+					throw("math init "+this.err)
+					return 
+				}
 				let ic = 0 
 				this.allinput = {"__time":time}
 				for(let n in this.insock) {
@@ -692,7 +703,7 @@ GNode.regist = function(THREE) {
 					for(let o in ret) {	
 						this.outsock[o].setval(ic==0?ret[o][0]:ret[o])
 					}
-				}catch(err){throw("math runtime "+this.id+err)}
+				}catch(err){throw("math runtime "+err)}
 			},
 			setui:function() {
 				const ret = [] 
