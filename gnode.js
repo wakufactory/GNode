@@ -1,3 +1,7 @@
+// Geometry node 
+// Copyright 2022 wakufactory 
+// License:MIT
+
 //export {GNode}
 const GNode ={}
 GNode.init = function() {
@@ -289,6 +293,33 @@ GNode.Nodetree.prototype.eval = function() {
 	}
 	return result 
 }
+
+//***************
+// utils
+GNode.noise = function(u,v) {
+	function random(u,v){
+		const s = Math.sin(u*12.9898+v*78.233) * 43758.5453
+		return s-Math.floor(s)
+	}
+	function interpolation(f){
+		return f * f * (3.0 - 2.0 * f)
+//	return f * f * f * (f * (6.0 * f - 15.0) + 10.0);
+	}
+	function mix(a,b,r) {return a*(1-r)+b*r }
+
+    const pv = [Math.floor(u),Math.floor(v)] ;
+    const pd = [u-pv[0],v-pv[1]]
+
+    const px  = pv[0] ;
+    const px1 = pv[0]+1. ;
+    const r1 = random(px, pv[1]) ;
+    const r2 = random(px1,pv[1]) ;
+    const r3 = random(px ,pv[1]+1) ;
+    const r4 = random(px1,pv[1]+1) ;
+    const r = mix(mix(r1,r2,interpolation(pd[0])),mix(r3,r4,interpolation(pd[0])),interpolation(pd[1])) ;
+    return r; 
+}
+
 
 //***************
 // node library definition
@@ -645,8 +676,8 @@ GNode.regist = function(THREE) {
 
 			const fc = `
 				"use strict" 
-				const [PI,PI2,RAD,DEG,Time,sin,cos,tan,atan2,random,floor,ceil,fract,pow,sqrt,hypot,abs,sign,min,max,mix,clamp,step,smoothstep]=
-					[Math.PI,Math.PI*2,Math.PI/180,180/Math.PI,allinput.__time,Math.sin,Math.cos,Math.tan,Math.atan2,Math.random,Math.floor,Math.ceil,(a)=>a-Math.floor(x),Math.pow,Math.sqrt,Math.hypot,Math.abs,Math.sign,Math.min,Math.max,(x,y,a)=>x(1-a)+y*a,(x,a,b)=>Math.min(Math.max(x, a), b),(a,x)=>(x<a)?0:1,(e0,e1,x)=>{let xx=(x-e0)/(e1-e0);xx=Math.max(0,Math.min(1,xx));return xx*xx*(3-2*xx)}]
+				const [PI,PI2,RAD,DEG,Time,sin,cos,tan,atan2,random,floor,ceil,fract,pow,sqrt,hypot,abs,sign,min,max,mix,clamp,step,smoothstep,noise]=
+					[Math.PI,Math.PI*2,Math.PI/180,180/Math.PI,allinput.__time,Math.sin,Math.cos,Math.tan,Math.atan2,Math.random,Math.floor,Math.ceil,(a)=>a-Math.floor(x),Math.pow,Math.sqrt,Math.hypot,Math.abs,Math.sign,Math.min,Math.max,(x,y,a)=>x(1-a)+y*a,(x,a,b)=>Math.min(Math.max(x, a), b),(a,x)=>(x<a)?0:1,(e0,e1,x)=>{let xx=(x-e0)/(e1-e0);xx=Math.max(0,Math.min(1,xx));return xx*xx*(3-2*xx)},GNode.noise]
 				function getidx(n,i) {
 					let v = allinput[n]
 					if(Array.isArray(v)) v = (v.length<__ic)?v[i%v.length]:v[i]
