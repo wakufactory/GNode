@@ -1,5 +1,8 @@
-const $ = id=>document.querySelector(id)
+// node editor libs  
+// Copyright 2022 wakufactory 
+// License:MIT
 
+const $ = id=>document.querySelector(id)
 
 function dlog(msg) {
 	console.log(msg)
@@ -63,14 +66,18 @@ addnode(param,pos) {
 	}
 
 	str.push(`</div>`)
-	const settings = `<span class=uibase>name:<input type=text size=10 class=s_name value="${param.name}"></span>`
+	const settings = 
+		`<span class=uibase>name:<input type=text size=10 class=s_name value="${param.name}"></span><br/>
+		<span class=uibase>evalOnce:<input type=checkbox class=s_once ${param.param.evalonce?"checked":""}></span>`
 	str.push(`<div class=bottom>${settings}</div>`)
 	el.innerHTML = str.join("\n")
 	
 	el.querySelector("input.s_name").addEventListener("change", ev=>{
-		this.node.setparam({id:param.id,name:ev.target.value}) 
+		this.node.setparam(param.id,{name:ev.target.value}) 
 	})
-	
+	el.querySelector("input.s_once").addEventListener("change", ev=>{
+		this.node.setparam(param.id,{evalonce:ev.target.checked}) 
+	})	
 	if(param.ui) {
 		param.ui.forEach(ui=>{
 			if(ui.elem) {
