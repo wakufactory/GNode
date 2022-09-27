@@ -68,7 +68,7 @@ addnode(param,pos) {
 	str.push(`</div>`)
 	const settings = 
 		`<span class=uibase>name:<input type=text size=10 class=s_name value="${param.name}"></span><br/>
-		<span class=uibase>evalOnce:<input type=checkbox class=s_once ${param.param.evalonce?"checked":""}></span>`
+		<span class=uibase>evalOnce:<input type=checkbox class=s_once ${param.param?.evalonce?"checked":""}></span>`
 	str.push(`<div class=bottom>${settings}</div>`)
 	el.innerHTML = str.join("\n")
 	
