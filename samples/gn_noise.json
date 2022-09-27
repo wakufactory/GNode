@@ -1,0 +1,375 @@
+{
+  "gnode": "0.1",
+  "pos": {
+    "node1": {
+      "pos": [
+        41,
+        37
+      ]
+    },
+    "node2": {
+      "pos": [
+        1136,
+        56
+      ]
+    },
+    "node3": {
+      "pos": [
+        404,
+        23
+      ]
+    },
+    "node4": {
+      "pos": [
+        1081,
+        236
+      ]
+    },
+    "node5": {
+      "pos": [
+        819,
+        21
+      ]
+    },
+    "node6": {
+      "pos": [
+        456.6363636363636,
+        403.27272727272725
+      ]
+    },
+    "node7": {
+      "pos": [
+        868,
+        407
+      ]
+    },
+    "node9": {
+      "pos": [
+        435,
+        233
+      ]
+    },
+    "node10": {
+      "pos": [
+        70,
+        275
+      ]
+    },
+    "node11": {
+      "pos": [
+        51,
+        143
+      ]
+    },
+    "node8": {
+      "pos": [
+        15.40909090909091,
+        398.6363636363636
+      ]
+    },
+    "node12": {
+      "pos": [
+        9,
+        560
+      ]
+    },
+    "node13": {
+      "pos": [
+        440,
+        658
+      ]
+    },
+    "node14": {
+      "pos": [
+        16,
+        726
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "node1",
+      "nodetype": "Mesh",
+      "name": "basemesh",
+      "param": {
+        "shape": "sphere"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node2",
+      "nodetype": "Output",
+      "name": "node2",
+      "param": {},
+      "joint": {
+        "mesh": "node4.instance"
+      }
+    },
+    {
+      "id": "node3",
+      "nodetype": "CreateInstance",
+      "name": "node3",
+      "param": {
+        "evalonce": true,
+        "default": {
+          "count": 10
+        }
+      },
+      "joint": {
+        "mesh": "node1.mesh",
+        "count": "node10.result",
+        "material": "node11.material"
+      }
+    },
+    {
+      "id": "node4",
+      "nodetype": "InstanceColor",
+      "name": "node4",
+      "param": {},
+      "joint": {
+        "instance": "node5.instance",
+        "hsl": "node7.result"
+      }
+    },
+    {
+      "id": "node5",
+      "nodetype": "InstanceMatrix",
+      "name": "node5",
+      "param": {},
+      "joint": {
+        "instance": "node3.instance",
+        "translate": "node6.result",
+        "scale": "node9.result"
+      }
+    },
+    {
+      "id": "node6",
+      "nodetype": "Math",
+      "name": "position",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "a.x*2-1",
+              "a.y*2",
+              "b*0.5"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node8.result",
+        "b": "node13.result"
+      }
+    },
+    {
+      "id": "node7",
+      "nodetype": "Math",
+      "name": "color",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "b.z*0.5+Time/20000",
+              "0.5",
+              "0.5"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node3.findex",
+        "b": "node6.result"
+      }
+    },
+    {
+      "id": "node9",
+      "nodetype": "Math",
+      "name": "scale",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "random()*0+0.1*b"
+          }
+        }
+      },
+      "joint": {
+        "a": "node8.result",
+        "b": "node13.result"
+      }
+    },
+    {
+      "id": "node10",
+      "nodetype": "Value",
+      "name": "instancecount",
+      "param": {
+        "value": "400"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node11",
+      "nodetype": "Material",
+      "name": "node11",
+      "param": {
+        "roughness": 0.41,
+        "metalness": 0.343
+      },
+      "joint": {}
+    },
+    {
+      "id": "node8",
+      "nodetype": "Math",
+      "name": "calc uv",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "a%20/20",
+              "floor(a/20)/20",
+              "0"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node3.index"
+      }
+    },
+    {
+      "id": "node12",
+      "nodetype": "Math",
+      "name": "time",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "Time/(4000*a)"
+          }
+        }
+      },
+      "joint": {
+        "a": "node14.result"
+      }
+    },
+    {
+      "id": "node13",
+      "nodetype": "Math",
+      "name": "generate noise",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "noise(a.x*5+a.y*2+b,a.y*5+b)+noise(a.x*10+a.y*10,a.y*5+b)*0.5"
+          }
+        }
+      },
+      "joint": {
+        "a": "node8.result",
+        "b": "node12.result"
+      }
+    },
+    {
+      "id": "node14",
+      "nodetype": "Input",
+      "name": "speed",
+      "param": {
+        "input": {
+          "result": {
+            "caption": "input",
+            "value": 0.764
+          }
+        }
+      },
+      "joint": {}
+    }
+  ]
+}

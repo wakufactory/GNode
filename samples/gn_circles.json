@@ -1,0 +1,434 @@
+{
+  "gnode": "0.1",
+  "pos": {
+    "math_color": {
+      "pos": [
+        726.0512820512821,
+        643.2051282051282
+      ]
+    },
+    "math_scale": {
+      "pos": [
+        298.2972972972973,
+        245.45945945945945
+      ]
+    },
+    "sinput": {
+      "pos": [
+        119,
+        884.0000610351562
+      ]
+    },
+    "speed": {
+      "pos": [
+        38.941176470588246,
+        533.5882352941177
+      ]
+    },
+    "timer": {
+      "pos": [
+        46.88235294117647,
+        397.29411764705884
+      ]
+    },
+    "math_trans": {
+      "pos": [
+        666.4864864864865,
+        508.3783783783784
+      ]
+    },
+    "math_rot": {
+      "pos": [
+        658.7435897435897,
+        335.43589743589746
+      ]
+    },
+    "newnode4": {
+      "pos": [
+        654.7027027027027,
+        641
+      ]
+    },
+    "newnode5": {
+      "pos": [
+        316.3170731707317,
+        199.0731707317073
+      ]
+    },
+    "node1": {
+      "pos": [
+        43,
+        127.99998474121094
+      ]
+    },
+    "node2": {
+      "pos": [
+        39,
+        23
+      ]
+    },
+    "node3": {
+      "pos": [
+        413,
+        51.999969482421875
+      ]
+    },
+    "node6": {
+      "pos": [
+        930.8974358974359,
+        318.6923076923077
+      ]
+    },
+    "node7": {
+      "pos": [
+        1255.9999389648438,
+        68
+      ]
+    },
+    "node9": {
+      "pos": [
+        488.30864197530866,
+        676.8024691358024
+      ]
+    },
+    "node11": {
+      "pos": [
+        913.4615384615385,
+        547.7692307692307
+      ]
+    },
+    "node13": {
+      "pos": [
+        95.14814814814815,
+        252.35802469135803
+      ]
+    },
+    "node14": {
+      "pos": [
+        84,
+        387
+      ]
+    },
+    "node10": {
+      "pos": [
+        900.7560603444169,
+        50.29268292682926
+      ]
+    },
+    "node12": {
+      "pos": [
+        507.12345679012344,
+        448.3086042992863
+      ]
+    },
+    "node5": {
+      "pos": [
+        428,
+        252
+      ]
+    },
+    "node16": {
+      "pos": [
+        48,
+        554
+      ]
+    },
+    "node8": {
+      "pos": [
+        64,
+        694
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "node1",
+      "nodetype": "Material",
+      "name": "node1",
+      "param": {
+        "roughness": 0.427,
+        "metalness": 0.602
+      },
+      "joint": {}
+    },
+    {
+      "id": "node2",
+      "nodetype": "Mesh",
+      "name": "basemesh",
+      "param": {
+        "shape": "torus"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node3",
+      "nodetype": "CreateInstance",
+      "name": "node3",
+      "param": {
+        "evalonce": true,
+        "default": {
+          "count": 10
+        }
+      },
+      "joint": {
+        "mesh": "node2.mesh",
+        "material": "node1.material",
+        "count": "node13.result"
+      }
+    },
+    {
+      "id": "node6",
+      "nodetype": "InstanceColor",
+      "name": "node6",
+      "param": {},
+      "joint": {
+        "instance": "node10.instance",
+        "hsl": "node11.result"
+      }
+    },
+    {
+      "id": "node7",
+      "nodetype": "Output",
+      "name": "node7",
+      "param": {},
+      "joint": {
+        "mesh": "node6.instance"
+      }
+    },
+    {
+      "id": "node9",
+      "nodetype": "Math",
+      "name": "node9",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "0",
+              "noise(b/5+c,a*2.35)*5",
+              "0"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node3.findex",
+        "b": "node14.result",
+        "c": "node8.result"
+      }
+    },
+    {
+      "id": "node11",
+      "nodetype": "Math",
+      "name": "node11",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "a+Time/50000",
+              "0.8",
+              "0.5"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node3.findex"
+      }
+    },
+    {
+      "id": "node13",
+      "nodetype": "Value",
+      "name": "instancecount",
+      "param": {
+        "value": "20"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node14",
+      "nodetype": "Math",
+      "name": "loopspeed",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "a*6*PI+Time/500*b"
+          }
+        }
+      },
+      "joint": {
+        "a": "node3.findex",
+        "b": "node16.result"
+      }
+    },
+    {
+      "id": "node10",
+      "nodetype": "InstanceMatrix",
+      "name": "node10",
+      "param": {},
+      "joint": {
+        "instance": "node3.instance",
+        "translate": "node9.result",
+        "euler": "node12.result",
+        "scale": "node5.result"
+      }
+    },
+    {
+      "id": "node12",
+      "nodetype": "Math",
+      "name": "node12",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "PI/2",
+              "0",
+              "0"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node14.result"
+      }
+    },
+    {
+      "id": "node5",
+      "nodetype": "Math",
+      "name": "node5",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "a",
+              "a",
+              "a*.4"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node3.findex"
+      }
+    },
+    {
+      "id": "node16",
+      "nodetype": "Input",
+      "name": "speed",
+      "param": {
+        "input": {
+          "result": {
+            "caption": "input",
+            "value": 0.925,
+            "min": 0,
+            "max": 1
+          }
+        }
+      },
+      "joint": {}
+    },
+    {
+      "id": "node8",
+      "nodetype": "Math",
+      "name": "seed",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "random()*124"
+          }
+        },
+        "evalonce": true
+      },
+      "joint": {}
+    }
+  ]
+}
