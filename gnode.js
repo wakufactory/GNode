@@ -739,29 +739,27 @@ GNode.regist = function(THREE) {
 			},
 			setui:function() {
 				const ret = [] 
-				for(let o in this.param.output) {
-					const el = document.createElement("div")
-					let v = this.param.output[o].value
-					if(!Array.isArray(v)) v = [v]
-					const rows = v.length 
-					for(let i=0;i<v.length;i++) {
-						const sel = document.createElement("input")
-						sel.setAttribute("data-idx",i)
-						sel.value = v[i] 
-						el.appendChild(sel)
-						if(i<(v.length-1)) el.appendChild(document.createElement("br"))
-
-						sel.addEventListener("change", ev=>{
-							console.log(o+ev.target.value)
-							let v = ev.target.value
-							const idx = ev.target.getAttribute("data-idx") 
-							if(Array.isArray(this.param.output[o].value))this.param.output[o].value[idx] = v
-							else this.param.output[o].value = v
-						})		
-					}
-					ret.push({caption:null,elem:el})
+				const o = this.param.output.result 
+				if(o.type=="scalar")
+					ret.push(
+						{caption:"",type:"input",size:20,value:o.value,
+							callback:(e)=>o.value =e.value })
+				else {
+					ret.push(
+							{caption:"x",type:"input",size:20,value:o.value[0],
+								callback:(e)=>o.value[0]=e.value})
+					ret.push(
+							{caption:"y",type:"input",size:20,value:o.value[1],
+								callback:(e)=>o.value[1]=e.value})
+					if(o.type=="vec3"||o.type=="vec4")
+						ret.push(
+							{caption:"z",type:"input",size:20,value:o.value[2],
+								callback:(e)=>o.value[2]=e.value})
+					if(o.type=="vec4")
+						ret.push(
+							{caption:"w",type:"input",size:20,value:o.value[3],
+								callback:(e)=>o.value[3]=e.value})
 				}
-
 				return ret 
 			}
 		}
