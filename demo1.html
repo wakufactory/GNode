@@ -45,6 +45,7 @@ onload = async function() {
 	    const d = JSON.parse(e.target.result)
 	    if(d!=null && d.nodes) {
 		    console.log(d)
+		    $('#fmsg').innerHTML = "load file "+ev.target.files[0].name
 		    node.loaddata(d)
 	    }
 	  }
@@ -55,16 +56,24 @@ onload = async function() {
 function savedata(data) {
 	localStorage.setItem("nodedemo",JSON.stringify(data))
 }
-async function loaddata(data=null) {
-	return new Promise((resolve,reject)=>{
+function loaddata(data=null) {
+	return new Promise(async (resolve,reject)=>{
 		let d = data
 		if(d==null) {
+			if(location.search.match(/\.json$/)) {
+				d = await loadjson(location.search.substr(1))
+				if(d) {
+					$('#fmsg').innerHTML = "loaded "+location.search.substr(1)
+					resolve(d)
+					return} 
+			}
 			d = JSON.parse(localStorage.getItem("nodedemo"))
 			if(!d) d = {} 
 			if(!d.nodes) {
-				d = loadjson("temp.json?1").then(data=>resolve(data))
+				d = loadjson("samples/gn_templ.json?1").then(data=>resolve(data))
 				return 
 			}
+			$('#fmsg').innerHTML = "loaded from local storage"
 		}
 		resolve(d)  
 	})
@@ -74,6 +83,7 @@ function loadjson(path) {
 		fetch(path)
 			.then(response => response.json())
 			.then(data => resolve(data))
+			.catch(err=>resolve(null))
 	})
 }
 function error(msg) {
@@ -531,10 +541,11 @@ div.mdg input[type=number] {
 <body>
 <div id=head>
 zoom:<input type=range id=zoom min=20 max=100 value=100>
-<button id=reload>reload</button>
-<button id=save>save</button></a>
-<a  id=download download="n.json"><button>download</button></a>
-<input type=file id=upload>
+<button id=reload title="refresh nodes">reload</button>
+<button id=save title="save to local storage">save</button></a>
+<a  id=download download="n.json" title="download json"><button>download</button></a>
+<input type=file id=upload title="load json file">
+<span id=fmsg></span>
 </div>
 <div id=main>
 <div id=edit>
