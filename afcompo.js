@@ -1,4 +1,42 @@
 (function() {
+// node mesh component
+AFRAME.registerComponent('nodemesh',{
+	init:function() {
+		this.mesh = null
+	},
+	setnode:function(ntree) {
+		this.ntree = ntree 
+		if(this.ntree ===null) {
+			console.log("Error "+GNode.emsg)
+			return false
+		}
+		
+		this.mesh = this.ntree.eval()	//eval node
+		if(this.mesh===null) {
+			error(GNode.emsg)
+			return false 
+		}
+		console.log(this.mesh)
+		for(let i=0;i<this.mesh.length;i++)
+			this.el.object3D.add(this.mesh[i])			//add mesh to scene
+		return true 
+	},
+	update:function(old) {
+	},
+	remove:function() {
+		if(this.mesh==null) return 
+		for(let i=0;i<this.mesh.length;i++)
+			this.el.object3D.remove(this.mesh[i])			//remove from scene	
+		this.mesh = null 
+		this.ntree = null 	
+	},
+	tick:function(time,dur) {
+		if(this.mesh===null || this.ntree===null) return 
+		if(this.ntree.eval()===null) {		//eval node per frame
+			error(GNode.emsg)
+		}
+	},
+})
 // exit vr by B/Y button 
 AFRAME.registerComponent('exitvr', {
 	init:function() {
