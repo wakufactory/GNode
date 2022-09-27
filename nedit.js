@@ -298,7 +298,7 @@ setevent() {
 		ev.preventDefault()
 	})
 	this.cmenu.callback = (m)=> {
-		dlog(m.select+":"+m.pos[0]+"/"+m.pos[1])
+//		dlog(m.select+":"+m.pos[0]+"/"+m.pos[1])
 		this.node.newnode(m.select,m.pos)
 	}
 	//node menu
@@ -312,7 +312,7 @@ setevent() {
 		ev.preventDefault()
 	}
 	this.nodemenu.callback = (m)=> {
-		dlog(m.select+":"+m.pos[0]+"/"+m.pos[1])
+//		dlog(m.select+":"+m.pos[0]+"/"+m.pos[1])
 		switch(m.select) {
 			case "set":
 				const s = this.target.querySelector(".bottom").style
