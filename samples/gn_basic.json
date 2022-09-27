@@ -1,0 +1,101 @@
+{
+  "gnode": "0.1",
+  "pos": {
+    "node1": {
+      "pos": [
+        41,
+        24
+      ]
+    },
+    "node2": {
+      "pos": [
+        378,
+        22
+      ]
+    },
+    "node3": {
+      "pos": [
+        43,
+        136
+      ]
+    },
+    "node4": {
+      "pos": [
+        679,
+        15
+      ]
+    },
+    "node5": {
+      "pos": [
+        1098,
+        237
+      ]
+    },
+    "node6": {
+      "pos": [
+        1024,
+        20
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "node1",
+      "nodetype": "Mesh",
+      "name": "basemesh",
+      "param": {},
+      "joint": {}
+    },
+    {
+      "id": "node2",
+      "nodetype": "CreateInstance",
+      "name": "instance",
+      "param": {
+        "evalonce": true,
+        "default": {
+          "count": 10
+        }
+      },
+      "joint": {
+        "mesh": "node1.mesh",
+        "count": "node3.result"
+      }
+    },
+    {
+      "id": "node3",
+      "nodetype": "Value",
+      "name": "countvalue",
+      "param": {
+        "value": "10"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node4",
+      "nodetype": "InstanceMatrix",
+      "name": "addmatrix",
+      "param": {},
+      "joint": {
+        "instance": "node2.instance"
+      }
+    },
+    {
+      "id": "node5",
+      "nodetype": "Output",
+      "name": "root",
+      "param": {},
+      "joint": {
+        "mesh": "node6.instance"
+      }
+    },
+    {
+      "id": "node6",
+      "nodetype": "InstanceColor",
+      "name": "addcolor",
+      "param": {},
+      "joint": {
+        "instance": "node4.instance"
+      }
+    }
+  ]
+}
