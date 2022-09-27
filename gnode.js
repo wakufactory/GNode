@@ -401,7 +401,7 @@ GNode.regist = function(THREE) {
 						{name:"sphere",value:"sphere"},
 						{name:"cone",value:"cone"},
 						{name:"cylinder",value:"cylinder"},
-						{name:"capsule",value:"capsule"},
+//						{name:"capsule",value:"capsule"},
 						{name:"torus",value:"torus"},
 						{name:"icosa",value:"icosa"},
 						{name:"octa",value:"octa"},
@@ -497,6 +497,7 @@ GNode.regist = function(THREE) {
 		function(param){
 			this.nodetype = "Input"
 			this.value = {} 
+			this.param = param
 			this.input = param.input 
 			for(let k in this.input) {
 				this.outsock[k] = new GNode.Socket(k,this,"out","scalar")
