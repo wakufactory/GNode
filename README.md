@@ -13,8 +13,4 @@ geometry node editor for WebXR
 
 ## samples 
 
- - [basic template](demo1.html?samples/gn_templ.json)
- - [empty](demo1.html?samples/gn_empty.json)
- - [uzumaki](demo1.html?samples/gn_uzumaki.json)
- - [circles](demo1.html?samples/gn_circles.json)
- - [use noise](demo1.html?samples/gn_noise.json)  
+	[https://wakufactory.github.io/GNode/samples.html](https://wakufactory.github.io/GNode/samples.html)
