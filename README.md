@@ -13,4 +13,4 @@ geometry node editor for WebXR
 
 ## samples 
 
-	[https://wakufactory.github.io/GNode/samples.html](https://wakufactory.github.io/GNode/samples.html)
+[https://wakufactory.github.io/GNode/samples.html](https://wakufactory.github.io/GNode/samples.html)
