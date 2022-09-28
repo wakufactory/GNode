@@ -34,9 +34,11 @@ onload = async function() {
 	})
 	$('#save').addEventListener("click", ev=>{
 		const sd = node.getsavedata()
-		console.log(JSON.stringify(sd,null,1))
+
 		savedata(sd)
-		const blob = new Blob([JSON.stringify(sd,null,2)], {type: 'application\/json'})
+		const json = JSON.stringify(sd,null,2) 
+		navigator.clipboard.writeText(json)
+		const blob = new Blob([json], {type: 'application\/json'})
 		$('#download').download = new Date().toLocaleString().replace(" ","-")+".json"
 		$('#download').href = (URL.createObjectURL(blob))
 	})
