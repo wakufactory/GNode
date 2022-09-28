@@ -52,6 +52,16 @@ onload = async function() {
 	  }
     reader.readAsText(ev.target.files[0]);
 	})
+	$('#help').addEventListener("click", ev=>{
+		$('#hbox').style.display = "block"
+		ev.stopPropagation()
+	})
+	$('#hbox').addEventListener("click", ev=>{
+		ev.stopPropagation()
+	})
+	$('body').addEventListener("click", ev=>{
+		$('#hbox').style.display = "none"
+	})
 }
 
 function savedata(data) {
@@ -489,6 +499,21 @@ div.mdg input,textarea {
 div.mdg input[type=number] {
 	width:5rem ;
 }
+#hbox {
+	display:none ;
+	position:absolute ;
+	top:20vh;
+	left:20vw ;
+	width:60vw ;
+	height:60vh ;
+	background-color:#444 ;
+	padding:1rem ;
+	color:white ;
+	z-index:100 ;
+}
+#hbox dt {
+	font-weight:bold ;
+}
 </style>
 <style id=szoom>
 #base {
@@ -498,6 +523,7 @@ div.mdg input[type=number] {
 </head>
 <body>
 <div id=head>
+GNode <button id=help>HELP</button>
 zoom:<input type=range id=zoom min=20 max=100 value=100>
 <button id=reload title="refresh nodes">reload</button>
 <button id=save title="save to local storage">save</button></a>
@@ -547,6 +573,19 @@ zoom:<input type=range id=zoom min=20 max=100 value=100>
 <a-sky  material="shader:flat;color:#66a" radius="100" segments-height="6" segments-width="12"></a-sky>
 </a-scene>
 </div>
+</div>
+<div id=hbox>
+<h3>edit area</h3>
+<dl>
+	<dt>reload</dt><dd>reload nodes (needs after editing Math node)</dd>
+	<dt>save</dt><dd>save to local storage</dd>
+	<dt>download</dt><dd>download json file</dd>
+	<dt>file select</dt><dd>load from json file</dd>
+</dl>
+To add a new node, open context menu (right click, long push(Quest) )
+<h3>preview area</h3>
+Can move with WASD key.<br/>
+In VR mode , can move with touch-controller.<br/>
 </div>
 </body>
 </html>
