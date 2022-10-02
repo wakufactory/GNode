@@ -782,13 +782,33 @@ GNode.regist = function(THREE) {
 	GNode.registerNode("Output",
 		function(param){
 			this.nodetype="Output"
+			this.param.param
 			this.insock['mesh'] = new GNode.Socket("mesh",this,"in","mesh")
+			this.insock['scale'] = new GNode.Socket("scale",this,"in","vec3")
+			this.insock['euler'] = new GNode.Socket("euler",this,"in","vec3")
+			this.insock['translate'] = new GNode.Socket("translate",this,"in","vec3")
 			this.outsock['mesh'] = new GNode.Socket("mesh",this,"out","mesh")
 			this.result = this.outsock.mesh
 		},
 		{
 			eval:function() {
-				this.outsock.mesh.setval(this.insock.mesh.getval())
+				const mesh = this.insock.mesh.getval()
+				this.outsock.mesh.setval(mesh)
+				let sc = this.insock.scale.getval()
+				if(sc) {
+					if(!Array.isArray(sc)) sc = [sc,sc,sc]
+					mesh.scale.copy( new THREE.Vector3(...sc ))
+				}
+				let tr = this.insock.translate.getval()
+				if(tr) {
+					mesh.position.x = (tr[0])
+					mesh.position.y = (tr[1]) 
+					mesh.position.z = (tr[2])  
+				}
+				let eu = this.insock.euler.getval()
+				if(eu) {
+					mesh.setRotationFromEuler(new THREE.Euler(...eu))
+				}
 			}
 		}
 	)
