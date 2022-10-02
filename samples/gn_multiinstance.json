@@ -1,0 +1,559 @@
+{
+  "gnode": "0.1",
+  "pos": {
+    "node1": {
+      "pos": [
+        41,
+        24
+      ]
+    },
+    "node2": {
+      "pos": [
+        378,
+        22
+      ]
+    },
+    "node3": {
+      "pos": [
+        81,
+        243
+      ]
+    },
+    "node4": {
+      "pos": [
+        936,
+        17
+      ]
+    },
+    "node5": {
+      "pos": [
+        1366,
+        249
+      ]
+    },
+    "node6": {
+      "pos": [
+        1342,
+        20
+      ]
+    },
+    "node7": {
+      "pos": [
+        50,
+        113
+      ]
+    },
+    "node8": {
+      "pos": [
+        412,
+        509
+      ]
+    },
+    "node9": {
+      "pos": [
+        381.8169014084507,
+        220.18309859154928
+      ]
+    },
+    "node10": {
+      "pos": [
+        920,
+        240
+      ]
+    },
+    "node11": {
+      "pos": [
+        400,
+        362
+      ]
+    },
+    "node13": {
+      "pos": [
+        25,
+        374
+      ]
+    },
+    "node14": {
+      "pos": [
+        37,
+        556
+      ]
+    },
+    "node12": {
+      "pos": [
+        50,
+        739.9010989010989
+      ]
+    },
+    "node15": {
+      "pos": [
+        376.27472527472526,
+        738.7692307692307
+      ]
+    },
+    "node16": {
+      "pos": [
+        35.2967032967033,
+        873.5604395604396
+      ]
+    },
+    "node17": {
+      "pos": [
+        945,
+        595.4137931034483
+      ]
+    },
+    "node18": {
+      "pos": [
+        1385.103448275862,
+        637.9655172413793
+      ]
+    },
+    "node19": {
+      "pos": [
+        1425.7931034482758,
+        851.6896551724138
+      ]
+    },
+    "node20": {
+      "pos": [
+        716.2758620689656,
+        849.7241379310345
+      ]
+    },
+    "node21": {
+      "pos": [
+        317.0344827586207,
+        1047.4137931034484
+      ]
+    },
+    "node22": {
+      "pos": [
+        739.8965517241379,
+        1022.6206896551724
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "id": "node1",
+      "nodetype": "Mesh",
+      "name": "basemesh",
+      "param": {
+        "shape": "sphere"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node2",
+      "nodetype": "CreateInstance",
+      "name": "instance",
+      "param": {
+        "evalonce": true,
+        "default": {
+          "count": 10
+        }
+      },
+      "joint": {
+        "mesh": "node1.mesh",
+        "count": "node3.result",
+        "material": "node7.material"
+      }
+    },
+    {
+      "id": "node3",
+      "nodetype": "Value",
+      "name": "countvalue",
+      "param": {
+        "value": "10"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node4",
+      "nodetype": "InstanceMatrix",
+      "name": "addmatrix",
+      "param": {},
+      "joint": {
+        "instance": "node2.instance",
+        "translate": "node8.result",
+        "scale": "node9.result",
+        "euler": "node11.result"
+      }
+    },
+    {
+      "id": "node5",
+      "nodetype": "Output",
+      "name": "root",
+      "param": {},
+      "joint": {
+        "mesh": "node6.instance"
+      }
+    },
+    {
+      "id": "node6",
+      "nodetype": "InstanceColor",
+      "name": "addcolor",
+      "param": {},
+      "joint": {
+        "instance": "node4.instance",
+        "hsl": "node10.result"
+      }
+    },
+    {
+      "id": "node7",
+      "nodetype": "Material",
+      "name": "material",
+      "param": {
+        "roughness": 0.693,
+        "metalness": 0.175
+      },
+      "joint": {}
+    },
+    {
+      "id": "node8",
+      "nodetype": "Math",
+      "name": "position",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "sin(b+a*2*PI)",
+              "sin(b*5+a*2*PI)*0.5+1",
+              "cos(b+a*2*PI)"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node2.findex",
+        "b": "node13.result"
+      }
+    },
+    {
+      "id": "node9",
+      "nodetype": "Math",
+      "name": "scale",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "0.1",
+              "0.1",
+              "0.1"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node2.findex"
+      }
+    },
+    {
+      "id": "node10",
+      "nodetype": "Math",
+      "name": "color",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "a",
+              "0.8",
+              "0.5"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node2.findex"
+      }
+    },
+    {
+      "id": "node11",
+      "nodetype": "Math",
+      "name": "rotation",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node2.findex",
+        "b": "node13.result"
+      }
+    },
+    {
+      "id": "node13",
+      "nodetype": "Math",
+      "name": "timebase",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "Time/500*a"
+          }
+        }
+      },
+      "joint": {
+        "a": "node14.result"
+      }
+    },
+    {
+      "id": "node14",
+      "nodetype": "Input",
+      "name": "speed",
+      "param": {
+        "input": {
+          "result": {
+            "caption": "input",
+            "value": 0.283,
+            "min": 0,
+            "max": 1
+          }
+        }
+      },
+      "joint": {}
+    },
+    {
+      "id": "node12",
+      "nodetype": "Mesh",
+      "name": "node12",
+      "param": {
+        "shape": "torus"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node15",
+      "nodetype": "CreateInstance",
+      "name": "node15",
+      "param": {
+        "evalonce": true,
+        "default": {
+          "count": 10
+        }
+      },
+      "joint": {
+        "mesh": "node12.mesh",
+        "count": "node16.result"
+      }
+    },
+    {
+      "id": "node16",
+      "nodetype": "Value",
+      "name": "node16",
+      "param": {
+        "value": "10"
+      },
+      "joint": {}
+    },
+    {
+      "id": "node17",
+      "nodetype": "InstanceMatrix",
+      "name": "node17",
+      "param": {},
+      "joint": {
+        "instance": "node15.instance",
+        "scale": "node20.result",
+        "translate": "node21.result",
+        "euler": "node22.result"
+      }
+    },
+    {
+      "id": "node18",
+      "nodetype": "InstanceColor",
+      "name": "node18",
+      "param": {},
+      "joint": {
+        "instance": "node17.instance",
+        "hsl": "node10.result"
+      }
+    },
+    {
+      "id": "node19",
+      "nodetype": "Output",
+      "name": "node19",
+      "param": {},
+      "joint": {
+        "mesh": "node18.instance"
+      }
+    },
+    {
+      "id": "node20",
+      "nodetype": "Math",
+      "name": "node20",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "scalar",
+            "value": "0.1"
+          }
+        }
+      },
+      "joint": {}
+    },
+    {
+      "id": "node21",
+      "nodetype": "Math",
+      "name": "node21",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "sin(b+a*2*PI)",
+              "1",
+              "cos(b+a*2*PI)"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node15.findex",
+        "b": "node13.result"
+      }
+    },
+    {
+      "id": "node22",
+      "nodetype": "Math",
+      "name": "node22",
+      "param": {
+        "input": {
+          "a": {
+            "type": "scalar"
+          },
+          "b": {
+            "type": "scalar"
+          },
+          "c": {
+            "type": "scalar"
+          },
+          "d": {
+            "type": "scalar"
+          }
+        },
+        "output": {
+          "result": {
+            "type": "vec3",
+            "value": [
+              "PI/2",
+              "0",
+              "0"
+            ]
+          }
+        }
+      },
+      "joint": {
+        "a": "node15.findex"
+      }
+    }
+  ]
+}
