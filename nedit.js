@@ -11,23 +11,7 @@ class NEdit {
 constructor(node,baseelem) {
 	this.base = baseelem 
 	this.node = node 
-	this.mag = 1.0 ;	
-	this.cmenu = new CMenu(this.base,{
-		title:"AddNode",item:[
-			{disp:"Value",id:"Value"},
-			{disp:"Input",id:"Input"},
-			{disp:"Math(s)",id:"Math_s"},
-			{disp:"Math(v3)",id:"Math_v3"},
-			{disp:"Math(v4)",id:"Math_v4"},
-			{disp:"Latch",id:"Latch"},
-			{disp:"Mesh",id:"Mesh"},
-			{disp:"Material",id:"Material"},
-			{disp:"CreateInstance",id:"Instance"},
-			{disp:"InstanceMatrix",id:"InstMatrix"},
-			{disp:"InstanceColor",id:"InstColor"},
-			{disp:"Output",id:"Output"},		
-		]
-	})
+	this.mag = 1.0
 	this.nodemenu = new CMenu(this.base,{
 		item:[
 			{disp:"setting",id:"set"},
@@ -297,10 +281,7 @@ setevent() {
 		this.cmenu.show([ev.offsetX,ev.offsetY])
 		ev.preventDefault()
 	})
-	this.cmenu.callback = (m)=> {
-//		dlog(m.select+":"+m.pos[0]+"/"+m.pos[1])
-		this.node.newnode(m.select,m.pos)
-	}
+
 	//node menu
 	this.f_nodemenu = ev=>{
 		const em = evm(ev) 
@@ -346,6 +327,13 @@ addnodeevnt(nodebox) {
 	})
 	nodebox.querySelector('.menu').addEventListener("click", this.f_nodemenu)
 }
+setcmenu(cmenu) {
+	this.cmenu = new CMenu(this.base,cmenu)
+	this.cmenu.callback = (m)=> {
+//		dlog(m.select+":"+m.pos[0]+"/"+m.pos[1])
+		this.node.newnode(m.select,m.pos)
+	}	
+}
 editjoint(id1,m) {
 	const b = this.base.getBoundingClientRect()
 	const ii = id1.split("-")
@@ -367,15 +355,17 @@ drawjoint(id1,id2) {
 	const e = [(j2.x-b.x+j2.width/2)/this.mag,(j2.y-b.y+j2.height/2)/this.mag]
 	const l = Math.hypot(e[0]-s[0],e[1]-s[1])
 	const sofs = l/2
-	const svg = `<path d="M ${s[0]} ${s[1]} C ${s[0]+sofs} ${s[1]} ${e[0]-sofs} ${e[1]} ${e[0]} ${e[1]}">`
+	const svg = `<path d="M ${s[0]} ${s[1]} C ${s[0]+sofs} ${s[1]} ${e[0]-sofs} ${e[1]} ${e[0]} ${e[1]}"></path>`
 //	console.log(svg)
-	this.base.querySelector('svg.n_svg').innerHTML += (svg)
+	return svg 
+//	this.base.querySelector('svg.n_svg').innerHTML += (svg)
 }
 drawalljoints(joints) {
-	this.base.querySelector('svg.n_svg').innerHTML = ""
+	const jl = []
 	joints.forEach(j=>{
-		this.drawjoint(j[0],j[1])
+		jl.push(this.drawjoint(j[0],j[1]))
 	})
+	this.base.querySelector('svg.n_svg').innerHTML = jl.join("")	
 }
 }//NEdit
 
