@@ -31,7 +31,8 @@ addnode(param,pos) {
 	el.className = "box"
 	el.style = `left:${pos[0]}px;top:${pos[1]}px`
 	let str = []
-	str.push(`<div class=head>${param.nodetype}<span class="menu uibase">≡</span></div>`)
+	let eo = param.param.evalonce?"evalonce":""
+	str.push(`<div class="head"><span class="${eo}">${param.nodetype}</span><span class="menu uibase">≡</span></div>`)
 	str.push(`<div class=body>`)
 	if(param.input) {
 		str.push(`<div class=left>`)
@@ -51,7 +52,8 @@ addnode(param,pos) {
 
 	str.push(`</div>`)
 	const settings = 
-		`<span class=uibase>name:<input type=text size=10 class=s_name value="${param.name}"></span><br/>
+		`<span class=uibase>id: ${param.id}</span><br/>
+		<span class=uibase>name:<input type=text size=10 class=s_name value="${param.name}"></span><br/>
 		<span class=uibase>evalOnce:<input type=checkbox class=s_once ${param.param?.evalonce?"checked":""}></span>`
 	str.push(`<div class=bottom>${settings}</div>`)
 	el.innerHTML = str.join("\n")

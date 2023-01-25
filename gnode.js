@@ -88,7 +88,7 @@ GNode.Node.prototype.eval = function(time) {
 }
 // eval node
 GNode.Node.prototype._eval = function(time) {
-		//_eval input 
+		//_eval input for trig
 		if(this.joints && this.joints._eval) {
 			const es =  this.joints._eval 
 			es.parent._eval()
@@ -152,10 +152,15 @@ GNode.Socket =function(name,parent,dir="out",type= "scalar",delayed=false) {
 	
 GNode.Socket.prototype.setval = function(val) {
 		this.lastvalue = this.value 
-		this.value = val 
+		if( val!==null) {
+			if(this.type.match(/^vec/)) {if(!Array.isArray(val[0])) val = [val]}
+			else if(!Array.isArray(val)) val = [val]
+		}
+		this.value = val
 	}
-GNode.Socket.prototype.getval = function() {
-		return this.value 
+GNode.Socket.prototype.getval = function(sf=false) {
+	
+		return sf?(this.value===null?null:this.value[0]):this.value 
 	}
 GNode.Socket.prototype.setjoint = function(joint) {
 		this.joints.push(joint)
@@ -265,19 +270,22 @@ GNode.Nodetree.prototype.getjointsock = function(jn) {
 	return jo
 }
 // eval node tree
-GNode.Nodetree.prototype.eval = function() {
+GNode.Nodetree.prototype.eval = function(nodeid) {
 	const result = [] 
 	const time = new Date().getTime() - this.timestart 
 	for(let n in this.nodes) {
 		const node = this.nodes[n].obj
 		if(node.nodetype=="Output") {
+			if(nodeid!="" && node.id!=nodeid) continue 
 			try{
 				node._eval(time)
 			}catch(err) {		//catch runtime error
 				GNode.emsg = err 
 				return null 
 			} 
-			if(node.result.value!=null) result.push(node.result.value)
+			if(node.result.value!=null) {
+				result.push(node.result.value)
+			}
 		}
 	}
 	for(let n in this.nodes) {
@@ -341,62 +349,77 @@ GNode.regist = function(THREE) {
 				if(param.mesh ) {
 					mesh = param.mesh 
 				} else {
-				let geometry 
-				const radius = (param.radius===undefined)?1:param.radius 
-				const segment = (param.segment===undefined)?32:param.segment 
-				let height = (param.height===undefined)?radius*2:param.height
-				switch(this.shape) {
-					case "sphere":
-						geometry = new THREE.SphereGeometry( radius,segment,segment/2 );
-						break ;
-					case "cube":
-						geometry = new THREE.BoxGeometry( radius,radius,radius );
-						break 
-					case "cone":
-						let cheight = radius*2
-						if(param.height!==undefined) rtop = param.height
-						geometry = new THREE.ConeGeometry(radius,cheight,segment)
-						break;
-					case "cylinder":
-						let rtop = radius
-						let rbot = radius
-						if(param.radiustop!==undefined) rtop = param.radiustop
-						if(param.radiusbottom!==undefined) rbot = param.radiusbottom
-						geometry = new THREE.CylinderGeometry(rtop,rbot,height,segment)
-						break
-					case "capsule":
-						geometry = new THREE.CapsuleGeometry(radius,height,4,segment)					
-						break ;
-					case "torus":
-						let tube = 0.2 
-						let tubeseg = 64
-						if(param.tuberatio!==undefined) tube = param.tuberatio
-						if(param.tubeseg!==undefined) tubeseg = param.tubeseg
-						geometry = new THREE.TorusGeometry(radius,radius*tube,segment,tubeseg)
-						break
-					case "icosa":
-						geometry = new THREE.IcosahedronGeometry(radius)
-						break 
-					case "octa":
-						geometry = new THREE.OctahedronGeometry(radius)
-						break
-					case "dodeca":
-						geometry = new THREE.DodecahedronGeometry(radius)
-						break 
-				}
-				let material = this.insock.material.getval()
-				if(material==null) material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
-				mesh = new THREE.Mesh( geometry, material );
+					let geometry 
+					const radius = (param.radius===undefined)?1:param.radius 
+					const segment = (param.segment===undefined)?32:param.segment 
+					let height = (param.height===undefined)?radius*2:param.height
+					switch(this.shape) {
+						case "plane":
+							geometry = new THREE.PlaneGeometry( radius, radius );
+							break ;
+						case "sphere":
+							geometry = new THREE.SphereGeometry( radius,segment,segment/2 );
+							break ;
+						case "cube":
+							geometry = new THREE.BoxGeometry( radius,radius,radius );
+							break 
+						case "cone":
+							let cheight = radius*2
+							if(param.height!==undefined) rtop = param.height
+							geometry = new THREE.ConeGeometry(radius,cheight,segment)
+							break;
+						case "cylinder":
+							let rtop = radius
+							let rbot = radius
+							if(param.radiustop!==undefined) rtop = param.radiustop
+							if(param.radiusbottom!==undefined) rbot = param.radiusbottom
+							geometry = new THREE.CylinderGeometry(rtop,rbot,height,segment)
+							break
+						case "capsule":
+							geometry = new THREE.CapsuleGeometry(radius,height,4,segment)					
+							break ;
+						case "torus":
+							let tube = 0.2 
+							let tubeseg = 64
+							if(param.tuberatio!==undefined) tube = param.tuberatio
+							if(param.tubeseg!==undefined) tubeseg = param.tubeseg
+							geometry = new THREE.TorusGeometry(radius,radius*tube,segment,tubeseg)
+							break
+						case "icosa":
+							geometry = new THREE.IcosahedronGeometry(radius)
+							break 
+						case "octa":
+							geometry = new THREE.OctahedronGeometry(radius)
+							break
+						case "dodeca":
+							geometry = new THREE.DodecahedronGeometry(radius)
+							break 
+					}
+					let material = this.insock.material.getval(true)
+					if(material==null) {
+						material = new THREE.MeshStandardMaterial( { color: 0xffffff } );
+						if(this.shape=="plane") material.side = THREE.DoubleSide
+					}
+					mesh = new THREE.Mesh( geometry, material );
 				}
 				this.result.setval(mesh)				
 			},
 			"setui":function() {
 				const cb = (e) => {
-					this.param.shape = e.value	
-					this.shape = this.param.shape 
+					switch(e.key) {
+						case "type":
+							this.param.shape = e.value	
+							this.shape = this.param.shape
+							break 
+						case "radius":
+							this.param.radius = e.value 
+							break ; 
+					}
+
 				}
 				const p = [
 					{name:"type",caption:"shape",type:"select",select:[
+						{name:"plane",value:"plane"},
 						{name:"cube",value:"cube"},
 						{name:"sphere",value:"sphere"},
 						{name:"cone",value:"cone"},
@@ -406,7 +429,8 @@ GNode.regist = function(THREE) {
 						{name:"icosa",value:"icosa"},
 						{name:"octa",value:"octa"},
 						{name:"dodeca",value:"dodeca"}
-						],value:this.param.shape,callback:cb}
+						],value:this.param.shape,callback:cb},
+					{name:"radius",caption:"size",type:"number",size:5,value:this.param.radius,callback:cb}
 				]
 				return p 
 			}
@@ -418,17 +442,20 @@ GNode.regist = function(THREE) {
 			this.param = param 
 			if(!this.param.roughness)this.param.roughness=0.5
 			if(!this.param.metalness)this.param.metalness=0.5
-			
+			if(!this.param.color)this.param.color="#fff"
+			if(!this.param.side)this.param.side=THREE.FrontSide
 			this.outsock['material'] = new GNode.Socket("material",this,"out","material")
+//			this.insock['color'] = new GNode.Socket("color",this,"in","vec3")
 		},
 		{
 			"eval":function() {
 				this.material =  new THREE.MeshStandardMaterial( { color: 0xffffff,roughness:this.param.roughness,metalness:this.param.metalness } );
 				this.outsock.material.setval(this.material)
+				this.material.color = new THREE.Color(this.param.color)
+				this.material.side = parseInt(this.param.side )
 			},
 			"setui":function() {
 				const cb = (e) => {
-					console.log(e)
 					if(e.key=="roughness") {
 						this.material.roughness = e.value 
 						this.param.roughness = e.value 
@@ -437,10 +464,24 @@ GNode.regist = function(THREE) {
 						this.material.metalness = e.value 
 						this.param.metalness = e.value
 					}
+					if(e.key=="color") {
+						this.param.color = e.value
+						this.material.color = new THREE.Color(this.param.color) 
+					}
+					if(e.key=="side") {
+						this.param.side = e.value 
+						this.material.side = e.value 
+					}
 				}
 				const p = [
 					{name:"roughness",callback:cb,caption:"R",type:"range",min:0,max:1,value:this.param.roughness},
-					{name:"metalness",callback:cb,caption:"M",type:"range",min:0,max:1,value:this.param.metalness}
+					{name:"metalness",callback:cb,caption:"M",type:"range",min:0,max:1,value:this.param.metalness},
+					{name:"color",callback:cb,caption:"C",type:"text",size:10,value:this.param.color},
+					{name:"side",callback:cb,caption:"side",type:"select",select:[
+						{name:"front",value:THREE.FrontSide},
+						{name:"back",value:THREE.BackSide},
+						{name:"both",value:THREE.DoubleSide}
+					],value:this.param.side}
 				]
 				return p
 			}
@@ -466,7 +507,7 @@ GNode.regist = function(THREE) {
 			},
 			"setui":function() {
 				const cb =  e=>{
-					this.setval(e.value)
+					this.setval(parseFloat(e.value))
 					this.eval()
 				}
 				return [{name:"value",caption:"value",type:"number",value:this.value,size:5,callback:cb}]
@@ -539,11 +580,12 @@ GNode.regist = function(THREE) {
 			this.outsock['count'] = new GNode.Socket("count",this,"out","scalar")
 		},{
 			"eval":function() {
-				const count = this.insock.count.getval()
-				const mesh = this.insock.mesh.getval() 
+				const count = this.insock.count.getval(true)
+				const mesh = this.insock.mesh.getval(true)
 				if(count==0||mesh==null) return 
 				let material = this.insock.material.getval()
 				if(material==null) material =  mesh.material
+				else material = material[0]
 				let inst = new THREE.InstancedMesh( mesh.geometry,material,count )
 				inst.userData.maxcount = count 
 				let idx = []
@@ -580,38 +622,40 @@ GNode.regist = function(THREE) {
 				const mtx2 = new THREE.Matrix4()
 				const mtx3 = new THREE.Matrix4()
 				
-				const ini = this.insock.instance.getval()
+				const ini = this.insock.instance.getval(true)
 				if(ini==null) return 
 				let bmtx = this.insock.matrix.getval()
-				if(bmtx===null) bmtx = new THREE.Matrix4() 
+				if(bmtx===null) bmtx = [new THREE.Matrix4()]
 				const ins = this.insock.scale.getval()
 				const ine = this.insock.euler.getval()
 				const inq = this.insock.quaternion.getval()
 				const intr = this.insock.translate.getval()
 				let count = ini.userData.maxcount
-				if(ins && ins.length<count) count = ins.length
-				if(ine && ine.length<count) count = ine.length
-				if(inq && inq.length<count) count = inq.length
-				if(intr && intr.length<count) count = intr.length
-				if(bmtx && bmtx.length<count) count = bmtx.length
+				if(ins && ins.length>count) count = ins.length
+				if(ine && ine.length>count) count = ine.length
+				if(inq && inq.length>count) count = inq.length
+				if(intr && intr.length>count) count = intr.length
+				if(bmtx && bmtx.length>count) count = bmtx.length
+				function get(a,i) { return a[i%a.length] }
 				for(let i=0;i<count;i++) {
-					mtx.copy(Array.isArray(bmtx)?bmtx[i]:bmtx)
+					mtx.copy(get(bmtx,i))
 					if(ins) {
-						const sc = Array.isArray(ins)?(Array.isArray(ins[i])?ins[i]:[ins[i],ins[i],ins[i]]):[ins,ins,ins]
+						let  sc = get(ins,i)
+						sc = Array.isArray(sc)?sc:[sc,sc,sc]
 						mtx.premultiply(mtx3.makeScale(...sc))
 					}
 					if(ine) {
-						mtx.premultiply(mtx1.makeRotationFromEuler(new THREE.Euler(...ine[i])))
+						mtx.premultiply(mtx1.makeRotationFromEuler(new THREE.Euler(...get(ine,i))))
 					}
 					if(inq) {
-						mtx.premultiply(mtx1.makeRotationFromQuaternion (new THREE.Quaternion(...inq[i])))
+						mtx.premultiply(mtx1.makeRotationFromQuaternion (new THREE.Quaternion(...get(inq,i))))
 					}
 					if(intr) {
-						const tr = (Array.isArray(intr[i])?intr[i]:[intr[i],intr[i],intr[i]])
-						mtx.premultiply(mtx2.makeTranslation(...tr))
+						mtx.premultiply(mtx2.makeTranslation(...get(intr,i)))
 					}
 					ini.setMatrixAt( i, mtx )
 				}
+				ini.instanceMatrix.needsUpdate  = true
 				ini.count = count 
 				this.result.setval(ini)
 			}	
@@ -629,7 +673,7 @@ GNode.regist = function(THREE) {
 		{
 			"eval":function() {
 				const oi = []
-				const ini = this.insock.instance.getval()
+				const ini = this.insock.instance.getval(true)
 				if(ini==null) return 
 				const rgb = this.insock.rgb.getval()
 				const hsl = this.insock.hsl.getval()
@@ -782,7 +826,7 @@ GNode.regist = function(THREE) {
 	GNode.registerNode("Output",
 		function(param){
 			this.nodetype="Output"
-			this.param.param
+			this.param = param
 			this.insock['mesh'] = new GNode.Socket("mesh",this,"in","mesh")
 			this.insock['scale'] = new GNode.Socket("scale",this,"in","vec3")
 			this.insock['euler'] = new GNode.Socket("euler",this,"in","vec3")
@@ -792,20 +836,20 @@ GNode.regist = function(THREE) {
 		},
 		{
 			eval:function() {
-				const mesh = this.insock.mesh.getval()
-				this.outsock.mesh.setval(mesh)
-				let sc = this.insock.scale.getval()
+				const mesh = this.insock.mesh.getval(true)
+				this.outsock.mesh.value = mesh
+				let sc = this.insock.scale.getval(true)
 				if(sc) {
 					if(!Array.isArray(sc)) sc = [sc,sc,sc]
 					mesh.scale.copy( new THREE.Vector3(...sc ))
 				}
-				let tr = this.insock.translate.getval()
+				let tr = this.insock.translate.getval(true)
 				if(tr) {
 					mesh.position.x = (tr[0])
 					mesh.position.y = (tr[1]) 
 					mesh.position.z = (tr[2])  
 				}
-				let eu = this.insock.euler.getval()
+				let eu = this.insock.euler.getval(true)
 				if(eu) {
 					mesh.setRotationFromEuler(new THREE.Euler(...eu))
 				}
@@ -816,6 +860,9 @@ GNode.regist = function(THREE) {
 	GNode.registerNode("Latch",
 		function(param){
 			this.nodetype = "Latch"
+			this.param = param
+			this.type = param?.type 
+			if(!this.type) this.type="vec3" 
 			this.insock['input'] = new GNode.Socket("input",this,"in","any",true)
 			this.outsock['result'] = new GNode.Socket("result",this,"out","any")
 			this.result = this.outsock.result
@@ -823,12 +870,13 @@ GNode.regist = function(THREE) {
 		},
 		{
 			"eval":function(v) {
-				let out = [[0,0,0]] 
+				let out = this.type=="vec3"?[0,0,0]:0 
 				if(this.vstack!==null) out = structuredClone(this.vstack) 
-				this.outsock.result.setval(out)
+				this.outsock.result.value = out
 			},
 			"posteval":function() {
-				this.vstack = structuredClone(this.joints.input.getval())				
+				this.insock.input.value = this.joints.input.value[0]
+				this.vstack = structuredClone(this.insock.input.value)				
 			}
 		}
 		)	
@@ -850,16 +898,16 @@ GNode.regist = function(THREE) {
 				const mtx2 = new THREE.Matrix4()
 				const mtx3 = new THREE.Matrix4()
 				
-				let ini = this.insock.mesh.getval()
-				let bmtx = this.insock.matrix.getval()
+				let ini = this.insock.mesh.getval(true)
+				let bmtx = this.insock.matrix.getval(true)
 				if(bmtx===null) bmtx = new THREE.Matrix4() 
-				const ins = this.insock.scale.getval()
-				const ine = this.insock.euler.getval()
-				const intr = this.insock.translate.getval()
+				const ins = this.insock.scale.getval(true)
+				const ine = this.insock.euler.getval(true)
+				const intr = this.insock.translate.getval(true)
 		
 					if(ins) {
 						const sc = Array.isArray(ins)?ins:[ins,ins,ins]
-						ini.scale.copy(new THREE.Vector3(...ins))
+						ini.scale.copy(new THREE.Vector3(...sc))
 					}
 					if(ine) {
 						ini.setRotationFromEuler(new THREE.Euler(...ine))
@@ -872,7 +920,32 @@ GNode.regist = function(THREE) {
 				this.result.setval(ini)
 			}	
 		}
-		)
-
+	)
+	GNode.registerNode("MeshGroup",
+		function(param) {
+			this.nodetype = "MeshGroup"
+			this.insock['mesh1'] = new GNode.Socket("mesh1",this,"in","mesh")
+			this.insock['mesh2'] = new GNode.Socket("mesh2",this,"in","mesh")
+			this.insock['mesh3'] = new GNode.Socket("mesh3",this,"in","mesh")
+			this.insock['mesh4'] = new GNode.Socket("mesh4",this,"in","mesh")
+			this.outsock['mesh'] = new GNode.Socket("mesh",this,"out","mesh")
+			this.result = this.outsock['mesh'] 
+			this.group =  new THREE.Group()
+		},
+		{
+			"eval":function() {
+				this.group.clear()
+				let m = this.insock.mesh1.getval(true) 
+				if(m) this.group.add(m) 
+				m = this.insock.mesh2.getval(true) 
+				if(m) this.group.add(m) 
+				m = this.insock.mesh3.getval(true) 
+				if(m) this.group.add(m) 
+				m = this.insock.mesh4.getval(true) 
+				if(m) this.group.add(m) 
+				this.result.setval(this.group)
+			}
+		}
+	)
 }
 

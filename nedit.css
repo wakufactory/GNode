@@ -1,0 +1,113 @@
+/* mdg basic css*/
+div.mdg {
+	position:relative ;
+	box-sizing:border-box;
+}
+div.mdg svg {
+	position:absolute ;
+	width:100% ;
+	height:100% ;
+	z-index:2 ;
+	pointer-events: none;
+}
+div.mdg .box {
+	position:absolute ;
+	border:2px solid black ;
+	background-color:white;
+	line-height:1.5em ;
+	padding:0.25em;
+	box-sizing:border-box;
+	cursor:move;
+	user-select: none;
+}
+div.mdg .box:hover {
+	z-index:10;	
+}
+div.mdg div.drag {
+	border:2px solid #f88 ;
+}
+div.mdg div.box {
+	text-align:center ;
+}
+div.mdg div.head {
+	width:100% ;
+	text-align: center ;
+	font-weight: bold;
+}
+div.mdg div.head span.evalonce {
+	font-style :italic  ;	
+}
+div.mdg div.head .menu {
+	font-size:1.5rem ;
+	margin-top:-0.2rem; 
+	padding-top:0;
+	display:inline-block;
+	position:absolute ;
+	right:0.5rem ;
+	cursor: pointer;
+}
+div.mdg div.body {
+	display:flex;
+}
+div.mdg div.right {
+	text-align: right ;
+	background-color: #ddd;
+}
+div.mdg div.left {
+	text-align:left ;
+	background-color: #ddd;
+}
+div.mdg div.mid {
+	text-align:left ;
+	margin-left:1rem;
+	margin-right:1rem ;
+}
+div.mdg div.bottom {
+	display:none ;
+	margin-top:0.5rem ;
+	text-align:left ;
+	background-color:#eee ;
+}
+div.mdg .uibase {
+
+}
+div.mdg .joint {
+	cursor: pointer;
+}
+div.mdg  svg path {
+	stroke:#2F2 ;
+	stroke-width:3px ;
+	fill:none ;
+}
+div.mdg  svg {
+	z-index:20;
+}
+div.mdg  svg.e_svg path {
+	stroke:#F22 ;
+}
+div.mdg div.cmenu {
+	position:absolute ;
+	width:10rem ;
+	border:1px solid black ;
+	background-color:#eee;
+	z-index:30;
+}
+div.mdg div.cmenu ul {
+	margin:0 ;
+	padding:0;
+}
+div.mdg div.cmenu li {
+	padding-left:0.5rem ;
+	list-style:none ;
+	cursor: pointer ;
+}
+div.mdg div.cmenu li:hover {
+	background-color:#ccc ;
+}
+div.mdg input,textarea {
+	font-family: monospace ;
+	margin-left:0.5rem ;
+}
+div.mdg input[type=number] {
+	width:5rem ;
+}
