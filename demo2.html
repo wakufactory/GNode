@@ -11,79 +11,84 @@
 <script src="gnedit.js?"></script>
 <script src="afcompo.js"></script>
 <script>
-onload = async function() {
 	GNode.init()
 	GNode.regist(THREE)									//init node
-	// load nodetata and create nodetree
-	const data = await loaddata()
-	console.log(data)
-	
-	// setup node editor 
-	const nedit = new GNEdit() 
-	const ncompo = []
-	$('a-scene').addEventListener("loaded", ev=>{
-		$('a-scene').querySelectorAll('[nodemesh]').forEach(o=>{
+
+onload = function() {
+	console.log("onload")
+	const nedit = new GNEdit($$('#base')) 
+	if($$('a-scene').hasLoaded) loadscene()
+	else $$('a-scene').addEventListener("loaded",loadscene)
+
+	async function loadscene() {
+		console.log("scene loaded")
+		// load nodetata and create nodetree
+		const data = await loaddata()
+		const ncompo = []
+		console.log(data)
+		$$('a-scene').querySelectorAll('[nodemesh]').forEach(o=>{
 			ncompo.push(o.components.nodemesh)
 		})
 		nedit.ncompo = ncompo
-		nedit.loaddata(data)		
+		nedit.loaddata(data)	
+	AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
+		if(mode!="AR") return
+		$$('a-scene').querySelectorAll('.noar').forEach(o=>{
+			o.setAttribute("visible",false )
+		}) 
 	})
-
+	AFRAME.scenes[0].addEventListener("exit-vr", ev=>{
+		$$('a-scene').querySelectorAll('.noar').forEach(o=>{
+			o.setAttribute("visible",true )
+		}) 
+	})
+	}
+	
 	//set up events 
-	$('#zoom').addEventListener("input",(ev)=> {
+	$$('#zoom').addEventListener("input",(ev)=> {
 		nedit.nodeedit.mag = ev.target.value/100 ;
-		$('#szoom').innerHTML = ("#base {transform: scale("+nedit.nodeedit.mag+")}");
+		$$('#szoom').innerHTML = ("#base {transform: scale("+nedit.nodeedit.mag+")}");
 	})
 	
-	$('#reload').addEventListener("click", ev=>{
+	$$('#reload').addEventListener("click", ev=>{
 		nedit.reload()
 	})
-	$('#save').addEventListener("click", ev=>{
+	$$('#save').addEventListener("click", ev=>{
 		const sd = nedit.getsavedata()
 
 		savedata(sd)
 		const json = JSON.stringify(sd,null,2) 
 		navigator.clipboard.writeText(json)
 		const blob = new Blob([json], {type: 'application\/json'})
-		$('#download').download = new Date().toLocaleString().replace(" ","-")+".json"
-		$('#download').href = (URL.createObjectURL(blob))
+		$$('#download').download = new Date().toLocaleString().replace(" ","-")+".json"
+		$$('#download').href = (URL.createObjectURL(blob))
 	})
-	$('#upload').addEventListener("input", ev=>{
+	$$('#upload').addEventListener("input", ev=>{
     const reader = new FileReader();
     reader.onload = (e) => { 
 	    const d = JSON.parse(e.target.result)
 	    if(d!=null && d.nodes) {
 		    console.log(d)
-		    $('#fmsg').innerHTML = "load file "+ev.target.files[0].name
+		    $$('#fmsg').innerHTML = "load file "+ev.target.files[0].name
 		    nedit.loaddata(d)
 	    }
 	  }
     reader.readAsText(ev.target.files[0]);
 	})
-	$('#help').addEventListener("click", ev=>{
-		$('#hbox').style.display = "block"
+	$$('#help').addEventListener("click", ev=>{
+		$$('#hbox').style.display = "block"
 		ev.stopPropagation()
 	})
-	$('#hbox').addEventListener("click", ev=>{
+	$$('#hbox').addEventListener("click", ev=>{
 		ev.stopPropagation()
 	})
-	$('body').addEventListener("click", ev=>{
-		$('#hbox').style.display = "none"
+	$$('body').addEventListener("click", ev=>{
+		$$('#hbox').style.display = "none"
 	})
 	let mode 
-	$('#enterVRButton').addEventListener("mousedown",ev=>{console.log("vrbtn");mode="VR"})
-	$('#enterARButton').addEventListener("mousedown",ev=>{mode="AR"})
-	AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
-		if(mode!="AR") return
-		$('a-scene').querySelectorAll('.noar').forEach(o=>{
-			o.setAttribute("visible",false )
-		}) 
-	})
-	AFRAME.scenes[0].addEventListener("exit-vr", ev=>{
-		$('a-scene').querySelectorAll('.noar').forEach(o=>{
-			o.setAttribute("visible",true )
-		}) 
-	})
+	$$('#enterVRButton').addEventListener("mousedown",ev=>{console.log("vrbtn");mode="VR"})
+	$$('#enterARButton').addEventListener("mousedown",ev=>{mode="AR"})
+
 }
 
 function savedata(data) {
@@ -96,7 +101,7 @@ function loaddata(data=null) {
 			if(location.search.match(/\.json$/)) {
 				d = await loadjson(location.search.substr(1))
 				if(d) {
-					$('#fmsg').innerHTML = "loaded "+location.search.substr(1)
+					$$('#fmsg').innerHTML = "loaded "+location.search.substr(1)
 					resolve(d)
 					return} 
 			}
@@ -106,7 +111,7 @@ function loaddata(data=null) {
 				d = loadjson("samples/gn_templ.json?1").then(data=>resolve(data))
 				return 
 			}
-			$('#fmsg').innerHTML = "loaded from local storage"
+			$$('#fmsg').innerHTML = "loaded from local storage"
 		}
 		resolve(d)  
 	})
@@ -120,7 +125,7 @@ function loadjson(path) {
 	})
 }
 function error(msg) {
-	$('#emsg').innerHTML = (msg)
+	$$('#emsg').innerHTML = (msg)
 }
 
 </script>

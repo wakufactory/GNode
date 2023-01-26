@@ -100,14 +100,21 @@ div.mdg div.cmenu li {
 	padding-left:0.5rem ;
 	list-style:none ;
 	cursor: pointer ;
+	display: block;
 }
 div.mdg div.cmenu li:hover {
 	background-color:#ccc ;
 }
 div.mdg input,textarea {
+	color:black ;
+	background-color:white ;
 	font-family: monospace ;
 	margin-left:0.5rem ;
 }
 div.mdg input[type=number] {
 	width:5rem ;
+}
+div.mdg span.rangeview {
+	display:inline-block;
+	width:2rem ;
 }

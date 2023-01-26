@@ -443,6 +443,7 @@ GNode.regist = function(THREE) {
 			if(!this.param.roughness)this.param.roughness=0.5
 			if(!this.param.metalness)this.param.metalness=0.5
 			if(!this.param.color)this.param.color="#fff"
+			if(!this.param.opacity)this.param.opacity=1
 			if(!this.param.side)this.param.side=THREE.FrontSide
 			this.outsock['material'] = new GNode.Socket("material",this,"out","material")
 //			this.insock['color'] = new GNode.Socket("color",this,"in","vec3")
@@ -452,6 +453,8 @@ GNode.regist = function(THREE) {
 				this.material =  new THREE.MeshStandardMaterial( { color: 0xffffff,roughness:this.param.roughness,metalness:this.param.metalness } );
 				this.outsock.material.setval(this.material)
 				this.material.color = new THREE.Color(this.param.color)
+				this.material.opacity = this.param.opacity
+				this.material.transparent = (this.param.opacity!=1) 
 				this.material.side = parseInt(this.param.side )
 			},
 			"setui":function() {
@@ -468,6 +471,11 @@ GNode.regist = function(THREE) {
 						this.param.color = e.value
 						this.material.color = new THREE.Color(this.param.color) 
 					}
+					if(e.key=="opacity") {
+						this.param.opacity = e.value
+						this.material.opacity = e.value 
+						this.material.transparent = (this.param.opacity!=1) 
+					}
 					if(e.key=="side") {
 						this.param.side = e.value 
 						this.material.side = e.value 
@@ -476,8 +484,9 @@ GNode.regist = function(THREE) {
 				const p = [
 					{name:"roughness",callback:cb,caption:"R",type:"range",min:0,max:1,value:this.param.roughness},
 					{name:"metalness",callback:cb,caption:"M",type:"range",min:0,max:1,value:this.param.metalness},
-					{name:"color",callback:cb,caption:"C",type:"text",size:10,value:this.param.color},
-					{name:"side",callback:cb,caption:"side",type:"select",select:[
+					{name:"color",callback:cb,caption:"Color",type:"text",size:10,value:this.param.color},
+					{name:"opacity",callback:cb,caption:"Opacity",type:"range",min:0,max:1,value:this.param.opacity},
+					{name:"side",callback:cb,caption:"Side ",type:"select",select:[
 						{name:"front",value:THREE.FrontSide},
 						{name:"back",value:THREE.BackSide},
 						{name:"both",value:THREE.DoubleSide}

@@ -1,12 +1,12 @@
 // bridget GNode to NEdit 
 class GNEdit {
-constructor() {	
+constructor(base) {	
 	this.ntree = null 
 	this.ncompo = null 
 	this.joints = [] 
 	this.nc = 0
 	this.position = {}
-	this.nodeedit = new NEdit(this,$('#base'))
+	this.nodeedit = new NEdit(this,base)
 	
 	this.nodeedit.setcmenu({
 		title:"AddNode",item:[
@@ -33,7 +33,6 @@ loaddata(data) {
 	this.position = {}
 	this.nodeedit.clear()	
 	const pos = data.pos 
-	error("")
 	this.ntree = GNode.mknode(data.nodes)		//make node tree
 	// set a-frame component
 	this.ncompo?.forEach(o=>{
@@ -53,7 +52,6 @@ reload() {
 		const nd = this.ntree.serialize()
 		console.log(nd)
 		this.nodeedit.clear()
-		error("")
 		this.ntree = GNode.mknode(nd)		//make node tree
 		if(this.ntree==null) {
 			console.log(GNode.emsg)

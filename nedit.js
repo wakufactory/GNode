@@ -2,7 +2,7 @@
 // Copyright 2022 wakufactory 
 // License:MIT
 
-const $ = id=>document.querySelector(id)
+const $$ = id=>document.querySelector(id)
 
 function dlog(msg) {
 	console.log(msg)
@@ -31,7 +31,7 @@ addnode(param,pos) {
 	el.className = "box"
 	el.style = `left:${pos[0]}px;top:${pos[1]}px`
 	let str = []
-	let eo = param.param.evalonce?"evalonce":""
+	let eo = param.param?.evalonce?"evalonce":""
 	str.push(`<div class="head"><span class="${eo}">${param.nodetype}</span><span class="menu uibase">≡</span></div>`)
 	str.push(`<div class=body>`)
 	if(param.input) {
@@ -93,18 +93,24 @@ addnode(param,pos) {
 					})
 					elem.appendChild(input)
 				} else if(ui.type=="range") {
+					function round(v) {return v.toString().substr(0,4)}
 					const input = document.createElement("input")
 					input.type = ui.type
 					input.max = 1000
 					input.min = 0 
 					input.value = (ui.value-ui.min)*1000/(ui.max-ui.min)
+					const disp = document.createElement('span')
+					disp.className = "rangeview"
+					disp.innerHTML = round(ui.value) 
 					input.addEventListener("input", ev=>{
 						if(ui.callback) {
 							const v = ui.min+(ev.target.value/1000)*(ui.max-ui.min)
+							disp.innerHTML = round(v) 
 							ui.callback({key:ui.name,value:v})
 						}
 					})
 					elem.appendChild(input)
+					elem.appendChild(disp)
 				} else {
 					const input = document.createElement("input")
 					input.type = ui.type
@@ -339,7 +345,7 @@ setcmenu(cmenu) {
 editjoint(id1,m) {
 	const b = this.base.getBoundingClientRect()
 	const ii = id1.split("-")
-	const j1 = $('#'+id1).getBoundingClientRect()
+	const j1 = $$('#'+id1).getBoundingClientRect()
 	const s = [(j1.x-b.x+j1.width/2)/this.mag,(j1.y-b.y+j1.height/2)/this.mag]
 	const e = [(m.x-b.x)/this.mag,(m.y-b.y)/this.mag]
 	const l = Math.hypot(e[0]-s[0],e[1]-s[1])
@@ -350,8 +356,8 @@ editjoint(id1,m) {
 }
 drawjoint(id1,id2) {
 	const b = this.base.getBoundingClientRect()
-	const j1 = $('#'+id1).getBoundingClientRect()
-	const j2 = $('#'+id2).getBoundingClientRect()
+	const j1 = $$('#'+id1).getBoundingClientRect()
+	const j2 = $$('#'+id2).getBoundingClientRect()
 	if(!j1 || !j2) return 
 	const s = [(j1.x-b.x+j1.width/2)/this.mag,(j1.y-b.y+j1.height/2)/this.mag]
 	const e = [(j2.x-b.x+j2.width/2)/this.mag,(j2.y-b.y+j2.height/2)/this.mag]
