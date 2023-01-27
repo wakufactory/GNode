@@ -400,7 +400,7 @@ GNode.regist = function(THREE) {
 				}
 				output.push( `__c = ${code} ; if(__c!==null) __result['${n.id}'].push( __c );`) 
 				result.push( `${n.id}:[]`)
-				this.outsock.set(n.id, new GNode.Socket(n.id,n.id,this,"out",n.type)	)
+				this.outsock.set(n.id, new GNode.Socket(n.id,(n.id=="ressult")?"R":n.id,this,"out",n.type)	)
 			}
 			this.result = this.outsock.get('result')
 

@@ -249,7 +249,7 @@ GNode.Nodetree.prototype.serialize = function() {
 		rr.joint = {}
 		for(let j in node.joints) {
 			const js = node.joints[j]
-			rr.joint[j] = js.parent.id+"."+j	
+			rr.joint[j] = js.parent.id+"."+js.id
 		}
 		r.push(rr)
 	}
