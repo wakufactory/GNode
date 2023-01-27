@@ -23,6 +23,7 @@ constructor(base) {
 			{disp:"InstanceColor",id:"InstColor"},
 			{disp:"MeshMatrix",id:"MeshMatrix"},
 			{disp:"MeshGroup",id:"MeshGroup"},
+			{disp:"Hub",id:"Hub"},
 			{disp:"Output",id:"Output"},		
 		]
 	})
@@ -33,6 +34,29 @@ loaddata(data) {
 	this.position = {}
 	this.nodeedit.clear()	
 	const pos = data.pos 
+	
+	// for back compati
+	data.nodes.forEach(n=>{
+		if(n.param && n.param.input && !Array.isArray(n.param.input)) {
+			const a = []
+			for(let k in n.param.input) {
+				const p = n.param.input[k]
+				p.id = k 
+				a.push(p)
+			} 
+			n.param.input = a 
+		}
+		if(n.param && n.param.output && !Array.isArray(n.param.output)) {
+			const a = []
+			for(let k in n.param.output) {
+				const p = n.param.output[k]
+				p.id = k 
+				a.push(p)
+			} 
+			n.param.output = a 
+		}
+	})
+	
 	this.ntree = GNode.mknode(data.nodes)		//make node tree
 	// set a-frame component
 	this.ncompo?.forEach(o=>{
@@ -49,18 +73,21 @@ getsavedata() {
 		return {gnode:"0.1",pos:this.position,nodes:nd} 	
 }
 reload() {
-		const nd = this.ntree.serialize()
-		console.log(nd)
-		this.nodeedit.clear()
-		this.ntree = GNode.mknode(nd)		//make node tree
-		if(this.ntree==null) {
+	const nd = this.ntree.serialize()
+	console.log(nd)
+	this.nodeedit.clear()
+	this.ntree = GNode.mknode(nd)		//make node tree
+	if(this.ntree==null) {
 			console.log(GNode.emsg)
-		}
-		console.log(this.ntree.nodes)
-		this.setntree(this.ntree)
+			return false 
+	}
+	console.log(this.ntree.nodes)
+		
+	this.setntree(this.ntree)
 	this.ncompo?.forEach(o=>{
 		o.setnode(this.ntree)
 	})	
+	return true 
 }
 //
 addnode(node) {
@@ -68,15 +95,15 @@ addnode(node) {
 		const nd = {nodetype:n.nodetype,name:n.name,id:n.id,body:[n.name],param:n.param}
 		if(n.insock) {
 			nd.input = [] 
-			for(let inode in n.insock) {
+			for(let [inode,sock] of n.insock) {
 				if(inode=="_eval") continue 
-				nd.input.push({id:inode,name:n.insock[inode].name})
+				nd.input.push({id:inode,name:sock.name})
 			}
 		}
 		if(n.outsock) {
 			nd.output = [] 
-			for(let inode in n.outsock) {
-				nd.output.push({id:inode,name:n.outsock[inode].name})
+			for(let [inode,sock] of n.outsock) {
+				nd.output.push({id:inode,name:sock.name})
 			}
 		}
 		if(n.setui) {
@@ -87,7 +114,7 @@ addnode(node) {
 		for(let j in n.joints) {
 			const ins = `${n.id}-i-${j}`
 			const tj = n.joints[j] 
-			const out = `${tj.parent.id}-o-${tj.name}`
+			const out = `${tj.parent.id}-o-${tj.id}`
 //			console.log(out+":"+ins)
 			jn.push([out,ins])
 		}
@@ -132,39 +159,40 @@ newnode(type,pos) {
 		"Input":{
 			nodetype:"Input",
 			param:{
-				input:{result:{caption:"input",value:0,min:0,max:1}}
+				input:[{id:"result",caption:"input",value:0,min:0,max:1}]
 			}
 		},
 		"Math_s":{
 			nodetype:"Math",
 			param:{
-				input:{a:{type:"scalar"},b:{type:"scalar"},c:{type:"scalar"},d:{type:"scalar"}},
-				output:{result:{type:"scalar",value:"0"}}
+				input:[{id:"a",type:"scalar"},{id:"b",type:"scalar"},{id:"c",type:"scalar"},{id:"d",type:"scalar"}],
+				output:[{id:"result",type:"scalar",value:"0"}]
 			}
 		},
 		"Math_v3":{
 			nodetype:"Math",
 			param:{
-				input:{a:{type:"scalar"},b:{type:"scalar"},c:{type:"scalar"},d:{type:"scalar"}},
-				output:{result:{type:"vec3",value:["0","0","0"]}}
+				input:[{id:"a",type:"scalar"},{id:"b",type:"scalar"},{id:"c",type:"scalar"},{id:"d",type:"scalar"}],
+				output:[{id:"result",type:"vec3",value:["0","0","0"]}]
 			}
 		},
 		"Math_v4":{
 			nodetype:"Math",
 			param:{
-				input:{a:{type:"scalar"},b:{type:"scalar"},c:{type:"scalar"},d:{type:"scalar"}},
-				output:{result:{type:"vec4",value:["0","0","0","0"]}}
+				input:[{id:"a",type:"scalar"},{id:"b",type:"scalar"},{id:"c",type:"scalar"},{id:"d",type:"scalar"}],
+				output:[{id:"result",type:"vec4",value:["0","0","0","0"]}]
 			}
 		},
 		"Latch":{nodetype:"Latch",param:{evalonce:true}},
 		"Mesh":{nodetype:"Mesh",param:{evalonce:true}},
 		"Material":{nodetype:"Material",param:{evalonce:true}},
-		"Instance":{nodetype:"CreateInstance",param:{evalonce:true,default:{count:10}}},
+		"Instance":{nodetype:"CreateInstance",param:{evalonce:true,count:10}},
 		"InstMatrix":{nodetype:"InstanceMatrix"},
 		"InstColor":{nodetype:"InstanceColor"},
 		"Output":{nodetype:"Output"},
 		"MeshMatrix":{nodetype:"MeshMatrix"},
-		"MeshGroup":{nodetype:"MeshGroup"}
+		"MeshGroup":{nodetype:"MeshGroup"},
+		"Hub":{nodetype:"Hub"}
 	}
 	let id = "node"+this.nc
 	while(this.ntree.getnode(id)) {

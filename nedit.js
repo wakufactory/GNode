@@ -334,6 +334,11 @@ addnodeevnt(nodebox) {
 		o.addEventListener("touchend",this.f_jup)
 	})
 	nodebox.querySelector('.menu').addEventListener("click", this.f_nodemenu)
+	nodebox.querySelectorAll('input').forEach(o=>{
+		o.addEventListener("focus", ev=>{
+			console.log(ev.target.type+":"+ev.target.parentNode.id)
+		})
+	})
 }
 setcmenu(cmenu) {
 	this.cmenu = new CMenu(this.base,cmenu)
