@@ -1,8 +1,75 @@
+// node mesh component
+AFRAME.registerSystem('nodemesh',{
+	init:function() {
+		this.entry = new Map() 
+	},
+	regist:function(compo,p) {
+		this.entry.set(compo,{'param':p})
+//		console.log(this.entry)
+	},
+	unregist:function(compo) {
+		this.entry.delete(compo) 
+	},
+	setdata:function(data) {
+//		console.log(data)
+		this.data = data 
+		let ret = null 
+		for(let [e,p] of this.entry) {
+			let ntree = new GNode.mknode(data) 
+			if(!ret) ret = ntree 
+			e.setnode(ntree)
+		}
+		return ret 
+	}
+})
+AFRAME.registerComponent('nodemesh',{
+	schema:{
+		nodeid:{default:""}
+	},
+	init:function() {
+		this.mesh = null
+		this.system.regist(this)
+	},
+	setnode:function(ntree) {
+		this.remove(false)
+		this.ntree = ntree 
+		if(this.ntree ===null) {
+			console.log("Error "+GNode.emsg)
+			return false
+		}
+		this.mesh = this.ntree.eval(this.data.nodeid)	//eval node
+		console.log(this.mesh)
+		if(this.mesh===null) {
+			POXA.log(GNode.emsg)
+			return false 
+		}
+		for(let i=0;i<this.mesh.length;i++) {
+			this.el.object3D.add(this.mesh[i])			//add mesh to scene
+		}
+		return true 
+	},
+	update:function(old) {
+	},
+	remove:function(f=true) {
+		if(this.mesh==null) return 
+		for(let i=0;i<this.mesh.length;i++)
+			this.el.object3D.remove(this.mesh[i])			//remove from scene	
+		this.mesh = null 
+		this.ntree = null 
+		if(f) this.system.unregist(this)
+	},
+	tick:function(time,dur) {
+		if(this.mesh===null || this.ntree===null) return 
+		if(this.ntree.eval(this.data.nodeid)===null) {		//eval node per frame
+			POXA.log(GNode.emsg)
+		}
+	}
+})
+
 // bridget GNode to NEdit 
 class GNEdit {
 constructor(base) {	
 	this.ntree = null 
-	this.ncompo = null 
 	this.joints = [] 
 	this.nc = 0
 	this.position = {}
@@ -56,13 +123,7 @@ loaddata(data) {
 			n.param.output = a 
 		}
 	})
-	
-	this.ntree = GNode.mknode(data.nodes)		//make node tree
-	// set a-frame component
-	this.ncompo?.forEach(o=>{
-		o.setnode(this.ntree)
-	})
-
+	this.ntree = document.querySelector('a-scene').systems.nodemesh.setdata(data.nodes)
 	if(pos) this.position = pos 
 	this.setntree(this.ntree)
 	console.log(this)	
@@ -76,7 +137,7 @@ reload() {
 	const nd = this.ntree.serialize()
 	console.log(nd)
 	this.nodeedit.clear()
-	this.ntree = GNode.mknode(nd)		//make node tree
+	this.ntree = document.querySelector('a-scene').systems.nodemesh.setdata(nd)
 	if(this.ntree==null) {
 			console.log(GNode.emsg)
 			return false 
@@ -84,9 +145,6 @@ reload() {
 	console.log(this.ntree.nodes)
 		
 	this.setntree(this.ntree)
-	this.ncompo?.forEach(o=>{
-		o.setnode(this.ntree)
-	})	
 	return true 
 }
 //

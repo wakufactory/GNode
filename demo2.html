@@ -10,7 +10,7 @@
 <script src="nedit.js?3"></script>
 <script src="gnedit.js?"></script>
 <script src="afcompo.js"></script>
-<script type="module">
+<script>
 
 	GNode.init()
 	GNode.regist(THREE)								//init node
@@ -25,24 +25,19 @@ onload = function() {
 		console.log("scene loaded")
 		// load nodetata and create nodetree
 		const data = await loaddata()
-		const ncompo = []
 		console.log(data)
-		$$('a-scene').querySelectorAll('[nodemesh]').forEach(o=>{
-			ncompo.push(o.components.nodemesh)
-		})
-		nedit.ncompo = ncompo
 		nedit.loaddata(data)	
-	AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
-		if(mode!="AR") return
-		$$('a-scene').querySelectorAll('.noar').forEach(o=>{
-			o.setAttribute("visible",false )
-		}) 
-	})
-	AFRAME.scenes[0].addEventListener("exit-vr", ev=>{
-		$$('a-scene').querySelectorAll('.noar').forEach(o=>{
-			o.setAttribute("visible",true )
-		}) 
-	})
+		AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
+			if(mode!="AR") return
+			$$('a-scene').querySelectorAll('.noar').forEach(o=>{
+				o.setAttribute("visible",false )
+			}) 
+		})
+		AFRAME.scenes[0].addEventListener("exit-vr", ev=>{
+			$$('a-scene').querySelectorAll('.noar').forEach(o=>{
+				o.setAttribute("visible",true )
+			}) 
+		})
 	}
 	
 	//set up events 
@@ -252,7 +247,7 @@ zoom:<input type=range id=zoom min=20 max=100 value=100>
 <!--sample objects-->
 <a-entity id=ebase nodemesh="" position="0 0.5 0" scale="1 1 1" >
 </a-entity>
-<a-entity id=ebase2  position="0 0.5 1" scale="1 1 1" >
+<a-entity id=ebase2 nodemesh position="1 0.5 1" scale="0.5 0.5 0.5" >
 </a-entity>
 <!--camera-->
 <a-entity id="camrig"  position="0 1.6 3" vrheight padmoved> 
