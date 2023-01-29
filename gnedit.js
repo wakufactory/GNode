@@ -40,7 +40,8 @@ AFRAME.registerComponent('nodemesh',{
 		this.mesh = this.ntree.eval(this.data.nodeid)	//eval node
 		console.log(this.mesh)
 		if(this.mesh===null) {
-			POXA.log(GNode.emsg)
+			if(window.POXA) POXA.log(GNode.emsg)
+			if(window.error) error(GNode.emsg)
 			return false 
 		}
 		for(let i=0;i<this.mesh.length;i++) {
@@ -61,7 +62,8 @@ AFRAME.registerComponent('nodemesh',{
 	tick:function(time,dur) {
 		if(this.mesh===null || this.ntree===null) return 
 		if(this.ntree.eval(this.data.nodeid)===null) {		//eval node per frame
-			POXA.log(GNode.emsg)
+			if(window.POXA) POXA.log(GNode.emsg)
+			if(window.error) error(GNode.emsg)
 		}
 	}
 })
@@ -91,8 +93,9 @@ constructor(base) {
 			{disp:"MeshMatrix",id:"MeshMatrix"},
 			{disp:"MeshGroup",id:"MeshGroup"},
 			{disp:"Hub",id:"Hub"},
-			{disp:"Output",id:"Output"},		
-		]
+			{disp:"Output",id:"Output"},
+			{disp:"Inspect",id:"Inspect"}	
+		]	
 	})
 }
 // load and create new nodethree 
@@ -241,7 +244,7 @@ newnode(type,pos) {
 				output:[{id:"result",type:"vec4",value:["0","0","0","0"]}]
 			}
 		},
-		"Latch":{nodetype:"Latch",param:{evalonce:true}},
+		"Latch":{nodetype:"Latch",param:{evalonce:false}},
 		"Mesh":{nodetype:"Mesh",param:{evalonce:true}},
 		"Material":{nodetype:"Material",param:{evalonce:true}},
 		"Instance":{nodetype:"CreateInstance",param:{evalonce:true,count:10}},
@@ -250,7 +253,8 @@ newnode(type,pos) {
 		"Output":{nodetype:"Output"},
 		"MeshMatrix":{nodetype:"MeshMatrix"},
 		"MeshGroup":{nodetype:"MeshGroup"},
-		"Hub":{nodetype:"Hub"}
+		"Hub":{nodetype:"Hub"},
+		"Inspect":{nodetype:"Inspect"}
 	}
 	let id = "node"+this.nc
 	while(this.ntree.getnode(id)) {

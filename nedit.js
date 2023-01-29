@@ -111,6 +111,8 @@ addnode(param,pos) {
 					})
 					elem.appendChild(input)
 					elem.appendChild(disp)
+				} else if(ui.type=="dom") {
+					elem.appendChild(ui.dom)	
 				} else {
 					const input = document.createElement("input")
 					input.type = ui.type
