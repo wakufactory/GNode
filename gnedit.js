@@ -81,6 +81,7 @@ constructor(base) {
 		title:"AddNode",item:[
 			{disp:"Value",id:"Value"},
 			{disp:"Input",id:"Input"},
+			{disp:"AFEntity",id:"AFEntity"},
 			{disp:"Math(s)",id:"Math_s"},
 			{disp:"Math(v3)",id:"Math_v3"},
 			{disp:"Math(v4)",id:"Math_v4"},
@@ -254,7 +255,8 @@ newnode(type,pos) {
 		"MeshMatrix":{nodetype:"MeshMatrix"},
 		"MeshGroup":{nodetype:"MeshGroup"},
 		"Hub":{nodetype:"Hub"},
-		"Inspect":{nodetype:"Inspect"}
+		"Inspect":{nodetype:"Inspect"},
+		"AFEntity":{nodetype:"AFEntity",param:{evalonce:true}}
 	}
 	let id = "node"+this.nc
 	while(this.ntree.getnode(id)) {

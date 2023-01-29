@@ -248,6 +248,43 @@ GNode.regist = function(THREE) {
 			}
 		}
 	)
+	
+	GNode.registerNode("AFEntity",
+		function(param) {
+			this.nodetype = "AFEntity"
+			if(!param) param = {query:""}
+			this.param = param 
+			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
+			this.outsock.set('material', new GNode.Socket('material',"material",this,"out","material"))
+			this.outsock.set('matrix', new GNode.Socket('matrix',"matrix",this,"out","matrix"))
+			this.result = this.outsock.get('mesh')
+		},
+		{
+			"eval":function() {
+				let dom = null 
+				try {
+					dom = document.querySelector(this.param.query)
+				} catch(err) {
+					console.log(err) 
+					return
+				}
+				if(dom===null) return 
+				if(!dom.getObject3D) return 
+				const mesh = dom.getObject3D("mesh")
+				if(!mesh) return 
+//				console.log(mesh)
+				this.result.setval(mesh)
+				this.outsock.get('material').setval(mesh.material)
+				this.outsock.get('matrix').setval(mesh.matrix)
+			},
+			"setui":function() {
+				const cb =  e=>{
+					this.param.query = e.value 
+				}
+				return [{name:"query",caption:"query",type:"input",value:this.param.query,size:5,callback:cb}]
+			}
+		}
+	)
 
 	GNode.registerNode("CreateInstance",
 		function(param){
@@ -265,6 +302,8 @@ GNode.regist = function(THREE) {
 			"eval":function() {
 				const count = this.insock.get('count').getval(true)
 				const mesh = this.insock.get('mesh').getval(true)
+				mesh.updateMatrix()
+				mesh.geometry.applyMatrix4(mesh.matrix)
 				if(count==0||mesh==null) return 
 				let material = this.insock.get('material').getval()
 				if(material==null) material =  mesh.material
@@ -467,9 +506,11 @@ GNode.regist = function(THREE) {
 				}
 				try{
 					const ret = (this.func)(ic==0?1:ic,this.allinput,this.lastdata)
-
 					for(let o in ret) {	
-						this.outsock.get(o).setval(ic==0?ret[o][0]:ret[o])
+						let out 
+						if(ic==0) out = ret[o][0]
+						else {out = ret[o] }
+						this.outsock.get(o).setval(out)
 					}
 				}catch(err){throw("math runtime "+err)}
 			},
@@ -556,23 +597,28 @@ GNode.regist = function(THREE) {
 			this.type = param?.type 
 			if(!this.type) this.type="vec3" 
 			this.insock.set('input', new GNode.Socket('input',"input",this,"in","any",true))
-			this.insock.set('initial', new GNode.Socket('initial',"initial",this,"in","any",true))
-
+			this.insock.set('initial', new GNode.Socket('initial',"initial",this,"in","any"))
 			this.outsock.set('result', new GNode.Socket('result',"result",this,"out","any"))
 			this.result = this.outsock.get('result')
 			this.vstack = null
 		},
 		{
 			"eval":function(v) {
-				if(!this.joints.input) return 
-				let out = this.type=="vec3"?[0,0,0]:0 
+				let out 
 				if(this.vstack!==null) out = structuredClone(this.vstack) 
+				else {
+					if(this.insock.get('initial').value) {
+						out =this.insock.get('initial').value	
+					}	
+					else out = this.type=="vec3"?[[0,0,0]]:[0] 			
+				}
 				this.outsock.get('result').value = out
 			},
 			"posteval":function() {
 				if(!this.joints.input) return 
-				this.insock.get('input').value = this.joints.input.value[0]
-				this.vstack = structuredClone(this.insock.get('input').value)				
+				this.insock.get('input').value = this.joints.input?.value
+				this.vstack = structuredClone(this.insock.get('input').value)	
+	//			console.log(this.vstack)			
 			}
 		}
 		)	
@@ -670,11 +716,12 @@ GNode.regist = function(THREE) {
 				if(!this.dom) return ;
 				let l = []
 				l.push("count:"+ins.length)
+//				console.log(ins)
 				ins.forEach((o,i)=>
 					{
 						let r 
 						if(Array.isArray(o)) r = `${i}:[`+o.map(v=>trunc(v)).join(",")+"]"
-						else r = trunc(o)
+						else r = `${i}:`+trunc(o)
 						l.push(r)
 					}
 				)
