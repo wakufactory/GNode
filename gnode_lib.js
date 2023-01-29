@@ -556,17 +556,21 @@ GNode.regist = function(THREE) {
 			this.type = param?.type 
 			if(!this.type) this.type="vec3" 
 			this.insock.set('input', new GNode.Socket('input',"input",this,"in","any",true))
+			this.insock.set('initial', new GNode.Socket('initial',"initial",this,"in","any",true))
+
 			this.outsock.set('result', new GNode.Socket('result',"result",this,"out","any"))
 			this.result = this.outsock.get('result')
 			this.vstack = null
 		},
 		{
 			"eval":function(v) {
+				if(!this.joints.input) return 
 				let out = this.type=="vec3"?[0,0,0]:0 
 				if(this.vstack!==null) out = structuredClone(this.vstack) 
 				this.outsock.get('result').value = out
 			},
 			"posteval":function() {
+				if(!this.joints.input) return 
 				this.insock.get('input').value = this.joints.input.value[0]
 				this.vstack = structuredClone(this.insock.get('input').value)				
 			}
@@ -652,6 +656,39 @@ GNode.regist = function(THREE) {
 			}
 		}
 	)
-
+	GNode.registerNode("Inspect",
+		function(param) {
+			this.nodetype = "Inspect"
+			this.insock.set('in', new GNode.Socket('in',"I",this,"in","mesh"))
+			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","mesh"))
+			this.result = this.outsock.get('out')
+		},
+		{
+			"eval":function() {
+				const ins = this.insock.get('in').getval()
+				this.result.setval(ins)
+				if(!this.dom) return ;
+				let l = []
+				l.push("count:"+ins.length)
+				ins.forEach((o,i)=>
+					{
+						let r 
+						if(Array.isArray(o)) r = `${i}:[`+o.map(v=>trunc(v)).join(",")+"]"
+						else r = trunc(o)
+						l.push(r)
+					}
+				)
+				this.dom.value = l.join("\n")
+				function trunc(a){return a.toString().substr(0,5)}
+			},
+			setui:function() {
+				this.dom = document.createElement('textarea')
+				this.dom.rows = 10 
+				this.dom.cols = 25 
+				return [{name:"val",caption:"",type:"dom",dom:this.dom}]
+				
+			}
+		}
+	)
 }
 
