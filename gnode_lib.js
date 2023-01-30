@@ -672,7 +672,7 @@ GNode.regist = function(THREE) {
 			this.insock.set('mesh2', new GNode.Socket('mesh2',"mesh2",this,"in","mesh"))
 			this.insock.set('mesh3', new GNode.Socket('mesh3',"mesh3",this,"in","mesh"))
 			this.insock.set('mesh4', new GNode.Socket('mesh4',"mesh4",this,"in","mesh"))
-			this.outsock.set('mesh', new GNode.Socket('mesh1',"mesh",this,"out","mesh"))
+			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
 			this.result = this.outsock.get('mesh')
 			this.group =  new THREE.Group()
 		},
