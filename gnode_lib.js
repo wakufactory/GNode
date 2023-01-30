@@ -605,7 +605,7 @@ GNode.regist = function(THREE) {
 		{
 			"eval":function(v) {
 				let out 
-				if(this.vstack!==null) out = structuredClone(this.vstack) 
+				if(this.vstack!==null) out = this.vstack.map(a=>{return Array.isArray(a)?Array(...a):a})
 				else {
 					if(this.insock.get('initial').value) {
 						out =this.insock.get('initial').value	
@@ -616,8 +616,10 @@ GNode.regist = function(THREE) {
 			},
 			"posteval":function() {
 				if(!this.joints.input) return 
-				this.insock.get('input').value = this.joints.input?.value
-				this.vstack = structuredClone(this.insock.get('input').value)	
+				const v = this.joints.input?.value
+				this.insock.get('input').value = v 
+//				this.vstack = structuredClone(v)	
+				this.vstack = v.map(a=>{return Array.isArray(a)?new Array(...a):a})
 	//			console.log(this.vstack)			
 			}
 		}
