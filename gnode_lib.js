@@ -680,13 +680,13 @@ GNode.regist = function(THREE) {
 			"eval":function() {
 				this.group.clear()
 				let m = this.insock.get('mesh1').getval(true) 
-				if(m) this.group.set(m) 
+				if(m) this.group.add(m) 
 				m = this.insock.get('mesh2').getval(true) 
-				if(m) this.group.set(m) 
+				if(m) this.group.add(m) 
 				m = this.insock.get('mesh3').getval(true) 
-				if(m) this.group.set(m) 
+				if(m) this.group.add(m) 
 				m = this.insock.get('mesh4').getval(true) 
-				if(m) this.group.set(m) 
+				if(m) this.group.add(m) 
 				this.result.setval(this.group)
 			}
 		}

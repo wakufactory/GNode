@@ -4,80 +4,87 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width">
 <title>GNode editor demo</title>
-<script src="aframe.min.js"></script>
+<script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
 <script src="gnode.js?3"></script>
+<script src="gnode_lib.js?1"></script>
 <script src="nedit.js?3"></script>
+<script src="gnedit.js?"></script>
 <script src="afcompo.js"></script>
 <script>
-onload = async function() {
+
 	GNode.init()
-	GNode.regist(THREE)									//init node
-	// load nodetata and create nodetree
-	const data = await loaddata()
-	console.log(data)
+	GNode.regist(THREE)								//init node
+
+onload = function() {
+	console.log("onload")
+	const nedit = new GNEdit($$('#base')) 
+	if($$('a-scene').hasLoaded) loadscene()
+	else $$('a-scene').addEventListener("loaded",loadscene)
+
+	async function loadscene() {
+		console.log("scene loaded")
+		// load nodetata and create nodetree
+		const data = await loaddata()
+		console.log(data)
+		nedit.loaddata(data)	
+		AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
+			if(mode!="AR") return
+			$$('a-scene').querySelectorAll('.noar').forEach(o=>{
+				o.setAttribute("visible",false )
+			}) 
+		})
+		AFRAME.scenes[0].addEventListener("exit-vr", ev=>{
+			$$('a-scene').querySelectorAll('.noar').forEach(o=>{
+				o.setAttribute("visible",true )
+			}) 
+		})
+	}
 	
-	// setup node editor 
-	const node = new Node() 
-	const ncompo = $('#ebase').components.nodemesh
-	node.ncompo = ncompo 
-
-	node.loaddata(data)
-
 	//set up events 
-	$('#zoom').addEventListener("input",(ev)=> {
-		node.nodeedit.mag = ev.target.value/100 ;
-		$('#szoom').innerHTML = ("#base {transform: scale("+node.nodeedit.mag+")}");
+	$$('#zoom').addEventListener("input",(ev)=> {
+		nedit.nodeedit.mag = ev.target.value/100 ;
+		$$('#szoom').innerHTML = ("#base {transform: scale("+nedit.nodeedit.mag+")}");
 	})
 	
-	$('#reload').addEventListener("click", ev=>{
-		node.reload()
+	$$('#reload').addEventListener("click", ev=>{
+		nedit.reload()
 	})
-	$('#save').addEventListener("click", ev=>{
-		const sd = node.getsavedata()
+	$$('#save').addEventListener("click", ev=>{
+		const sd = nedit.getsavedata()
 
 		savedata(sd)
 		const json = JSON.stringify(sd,null,2) 
 		navigator.clipboard.writeText(json)
 		const blob = new Blob([json], {type: 'application\/json'})
-		$('#download').download = new Date().toLocaleString().replace(" ","-")+".json"
-		$('#download').href = (URL.createObjectURL(blob))
+		$$('#download').download = new Date().toLocaleString().replace(" ","-")+".json"
+		$$('#download').href = (URL.createObjectURL(blob))
 	})
-	$('#upload').addEventListener("input", ev=>{
+	$$('#upload').addEventListener("input", ev=>{
     const reader = new FileReader();
     reader.onload = (e) => { 
 	    const d = JSON.parse(e.target.result)
 	    if(d!=null && d.nodes) {
 		    console.log(d)
-		    $('#fmsg').innerHTML = "load file "+ev.target.files[0].name
-		    node.loaddata(d)
+		    $$('#fmsg').innerHTML = "load file "+ev.target.files[0].name
+		    nedit.loaddata(d)
 	    }
 	  }
     reader.readAsText(ev.target.files[0]);
 	})
-	$('#help').addEventListener("click", ev=>{
-		$('#hbox').style.display = "block"
+	$$('#help').addEventListener("click", ev=>{
+		$$('#hbox').style.display = "block"
 		ev.stopPropagation()
 	})
-	$('#hbox').addEventListener("click", ev=>{
+	$$('#hbox').addEventListener("click", ev=>{
 		ev.stopPropagation()
 	})
-	$('body').addEventListener("click", ev=>{
-		$('#hbox').style.display = "none"
+	$$('body').addEventListener("click", ev=>{
+		$$('#hbox').style.display = "none"
 	})
 	let mode 
-	$('#enterVRButton').addEventListener("mousedown",ev=>{console.log("vrbtn");mode="VR"})
-	$('#enterARButton').addEventListener("mousedown",ev=>{mode="AR"})
-	AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
-		if(mode!="AR") return
-		$('a-scene').querySelectorAll('.noar').forEach(o=>{
-			o.setAttribute("visible",false )
-		}) 
-	})
-	AFRAME.scenes[0].addEventListener("exit-vr", ev=>{
-		$('a-scene').querySelectorAll('.noar').forEach(o=>{
-			o.setAttribute("visible",true )
-		}) 
-	})
+	$$('#enterVRButton').addEventListener("mousedown",ev=>{console.log("vrbtn");mode="VR"})
+	$$('#enterARButton').addEventListener("mousedown",ev=>{mode="AR"})
+
 }
 
 function savedata(data) {
@@ -90,7 +97,7 @@ function loaddata(data=null) {
 			if(location.search.match(/\.json$/)) {
 				d = await loadjson(location.search.substr(1))
 				if(d) {
-					$('#fmsg').innerHTML = "loaded "+location.search.substr(1)
+					$$('#fmsg').innerHTML = "loaded "+location.search.substr(1)
 					resolve(d)
 					return} 
 			}
@@ -100,7 +107,7 @@ function loaddata(data=null) {
 				d = loadjson("samples/gn_templ.json?1").then(data=>resolve(data))
 				return 
 			}
-			$('#fmsg').innerHTML = "loaded from local storage"
+			$$('#fmsg').innerHTML = "loaded from local storage"
 		}
 		resolve(d)  
 	})
@@ -114,269 +121,8 @@ function loadjson(path) {
 	})
 }
 function error(msg) {
-	$('#emsg').innerHTML = (msg)
+	$$('#emsg').innerHTML = (msg)
 }
-// bridget GNode to NEdit 
-class Node {
-constructor() {	
-	this.ntree = null 
-	this.ncompo = null 
-	this.joints = [] 
-	this.nc = 0
-	this.position = {}
-	this.nodeedit = new NEdit(this,$('#base'))
-	
-	this.nodeedit.setcmenu({
-		title:"AddNode",item:[
-			{disp:"Value",id:"Value"},
-			{disp:"Input",id:"Input"},
-			{disp:"Math(s)",id:"Math_s"},
-			{disp:"Math(v3)",id:"Math_v3"},
-			{disp:"Math(v4)",id:"Math_v4"},
-			{disp:"Latch",id:"Latch"},
-			{disp:"Mesh",id:"Mesh"},
-			{disp:"Material",id:"Material"},
-			{disp:"CreateInstance",id:"Instance"},
-			{disp:"InstanceMatrix",id:"InstMatrix"},
-			{disp:"InstanceColor",id:"InstColor"},
-			{disp:"MeshMatrix",id:"MeshMatrix"},
-			{disp:"MeshGroup",id:"MeshGroup"},
-			{disp:"Output",id:"Output"},		
-		]
-	})
-}
-// load and create new nodethree 
-loaddata(data) {
-	this.joints = []
-	this.position = {}
-	this.ncompo.remove()
-	this.nodeedit.clear()	
-	const pos = data.pos 
-	error("")
-	this.ntree = GNode.mknode(data.nodes)		//make node tree
-	// set a-frame component
-	this.ncompo.setnode(this.ntree)
-
-	if(pos) this.position = pos 
-	this.setntree(this.ntree)
-	console.log(this)	
-	
-}
-getsavedata() {
-		const nd = this.ntree.serialize()
-		return {gnode:"0.1",pos:this.position,nodes:nd} 	
-}
-reload() {
-		const nd = this.ntree.serialize()
-		console.log(nd)
-		this.ncompo.remove()
-		this.nodeedit.clear()
-		error("")
-		this.ntree = GNode.mknode(nd)		//make node tree
-		if(this.ntree==null) {
-			console.log(GNode.emsg)
-		}
-		console.log(this.ntree.nodes)
-		this.setntree(this.ntree)
-		this.ncompo.setnode(this.ntree)	
-}
-//
-addnode(node) {
-		const n = node
-		const nd = {nodetype:n.nodetype,name:n.name,id:n.id,body:[n.name],param:n.param}
-		if(n.insock) {
-			nd.input = [] 
-			for(let inode in n.insock) {
-				if(inode=="_eval") continue 
-				nd.input.push({id:inode,name:n.insock[inode].name})
-			}
-		}
-		if(n.outsock) {
-			nd.output = [] 
-			for(let inode in n.outsock) {
-				nd.output.push({id:inode,name:n.outsock[inode].name})
-			}
-		}
-		if(n.setui) {
-			nd.ui = n.setui() 
-		}
-
-		const jn = [] 
-		for(let j in n.joints) {
-			const ins = `${n.id}-i-${j}`
-			const tj = n.joints[j] 
-			const out = `${tj.parent.id}-o-${tj.name}`
-//			console.log(out+":"+ins)
-			jn.push([out,ins])
-		}
-//		console.log(nd)
-		return {node:nd,joints:jn}
-}
-// make node  data for NEdit 
-setntree(ntree) {
-	this.ntree = ntree 
-	const nodedata = ntree.nodes
-	const ret = []
-	this.joints = []
-	for(let id in nodedata) {
-		ret.push(this.addnode(nodedata[id].obj))
-	}
-	let x = 10 ;
-	let y = 10 ;
-	ret.forEach(n=>{
-		let p = [x,y]
-		if(this.position && this.position[n.node.id]) p = this.position[n.node.id].pos
-		this.nodeedit.addnode(n.node,p)
-		n.joints.forEach(j=>{
-			this.setjoint(...j)
-		})
-		x+=50
-		y+=50  
-	})
-	this.drawjoint()
-	return ret 
-}
-
-//****** call from NEdit 
-
-// add new node 
-newnode(type,pos) {
-	this.nc++
-	const newnode = {
-		"Value":{
-			nodetype:"Value",
-			param:{value:0}
-		},
-		"Input":{
-			nodetype:"Input",
-			param:{
-				input:{result:{caption:"input",value:0,min:0,max:1}}
-			}
-		},
-		"Math_s":{
-			nodetype:"Math",
-			param:{
-				input:{a:{type:"scalar"},b:{type:"scalar"},c:{type:"scalar"},d:{type:"scalar"}},
-				output:{result:{type:"scalar",value:"0"}}
-			}
-		},
-		"Math_v3":{
-			nodetype:"Math",
-			param:{
-				input:{a:{type:"scalar"},b:{type:"scalar"},c:{type:"scalar"},d:{type:"scalar"}},
-				output:{result:{type:"vec3",value:["0","0","0"]}}
-			}
-		},
-		"Math_v4":{
-			nodetype:"Math",
-			param:{
-				input:{a:{type:"scalar"},b:{type:"scalar"},c:{type:"scalar"},d:{type:"scalar"}},
-				output:{result:{type:"vec4",value:["0","0","0","0"]}}
-			}
-		},
-		"Latch":{nodetype:"Latch",param:{evalonce:true}},
-		"Mesh":{nodetype:"Mesh",param:{evalonce:true}},
-		"Material":{nodetype:"Material",param:{evalonce:true}},
-		"Instance":{nodetype:"CreateInstance",param:{evalonce:true,default:{count:10}}},
-		"InstMatrix":{nodetype:"InstanceMatrix"},
-		"InstColor":{nodetype:"InstanceColor"},
-		"Output":{nodetype:"Output"},
-		"MeshMatrix":{nodetype:"MeshMatrix"},
-		"MeshGroup":{nodetype:"MeshGroup"}
-	}
-	let id = "node"+this.nc
-	while(this.ntree.getnode(id)) {
-		this.nc++ 
-		id = "node"+this.nc 
-	}
-	const nodeparam = newnode[type]
-	if(!nodeparam) return 
-	nodeparam.id = id 
-	nodeparam.name = id 
-	console.log(nodeparam)
-	const nodes = this.ntree.addnodes([nodeparam])
-	if(nodes==null) {
-		console.log("node init error "+GNode.emsg)
-	}
-	console.log(nodes)
-
-	this.nodeedit.addnode(this.addnode(nodes[0]).node,pos)
-	this.position[id] = {pos:pos} 
-	return id 
-}
-// duplicate node
-duplicatenode(id) {
-	
-}
-setparam(id,param) {
-	console.log(id,param)
-	for(let k in param) {
-		switch( k ){
-			case "name":
-				this.ntree.nodes[id].obj.name = param[k] 
-				break 
-			case "evalonce":
-				this.ntree.nodes[id].obj.evalonce = param[k]
-				this.ntree.nodes[id].obj.param.evalonce = param[k]
-				break
-		}
-	}
-	this.reload()
-}
-// node moved
-nodemove(id,pos) {
-	this.position[id] = {pos:pos}
-}
-// joint changed 
-setjoint(id1,id2) {
-	const j1 = id1.split("-")
-	const j2 = id2.split("-")
-	if(id1==id2) {
-		this.removejoint(id1)
-		return 
-	}
-	if(j1[1]=="i" && j2[1]=="i" || j1[1]=="o" && j2[1]=="o") return
-
-	let j = [id1,id2]
-	let jn = [[j2[0],j2[2]],[j1[0],j1[2]]]
-	if(j1[1]=="i") {
-		j = [id2,id1]
-		jn = [[j1[0],j1[2]],[j2[0],j2[2]]]
-	}
-	this.joints.push(j)
-	if(this.ntree.jointnode(...jn)==false)
-		console.log("joint error")
-}
-removejoint(id) {
-	this.joints = this.joints.filter(j=>{
-		let ret = true 
-		if(j[0]==id||j[1]==id)  {
-			const sid = j[1].split("-")
-			this.ntree.removejoint([sid[0],sid[2]])
-			ret = false 
-		}
-		return ret  
-	})
-}
-// redraw joints
-drawjoint() {
-	this.nodeedit.drawalljoints(this.joints)
-}
-deletenode(id) {
-	console.log("delet "+id)
-	this.ntree.removenode(id)
-	this.nodeedit.removenode(id)
-	delete this.position[id]
-	this.joints = this.joints.filter(j=>{
-		let ret = true 
-		if(j[0].split("-")[0]==id||j[1].split("-")[0]==id)  {
-			ret = false 
-		}
-		return ret  
-	})
-	this.drawjoint()
-}
-}//Node
 
 </script>
 <style type="text/css">
@@ -417,8 +163,8 @@ html,body {
 }
 #base {
 	display:block ;
-	width:2000px;
-	height:2000px;
+	width:4000px;
+	height:4000px;
 	font-family:sans-serif;
 	background-color:#666 ;
 	transform-origin:0 0 ;
@@ -430,116 +176,6 @@ html,body {
 }
 a,a:visited {
 	color:white ;
-}
-/* mdg basic css*/
-div.mdg {
-	position:relative ;
-	box-sizing:border-box;
-}
-div.mdg svg {
-	position:absolute ;
-	width:100% ;
-	height:100% ;
-	z-index:2 ;
-	pointer-events: none;
-}
-div.mdg .box {
-	position:absolute ;
-	border:2px solid black ;
-	background-color:white;
-	line-height:1.5em ;
-	padding:0.25em;
-	box-sizing:border-box;
-	cursor:move;
-	user-select: none;
-}
-div.mdg .box:hover {
-	z-index:10;	
-}
-div.mdg div.drag {
-	border:2px solid #f88 ;
-}
-div.mdg div.box {
-	text-align:center ;
-}
-div.mdg div.head {
-	width:100% ;
-	text-align: center ;
-	font-weight: bold;
-}
-div.mdg div.head .menu {
-	font-size:1.5rem ;
-	margin-top:-0.2rem; 
-	padding-top:0;
-	display:inline-block;
-	position:absolute ;
-	right:0.5rem ;
-	cursor: pointer;
-}
-div.mdg div.body {
-	display:flex;
-}
-div.mdg div.right {
-	text-align: right ;
-	background-color: #ddd;
-}
-div.mdg div.left {
-	text-align:left ;
-	background-color: #ddd;
-}
-div.mdg div.mid {
-	text-align:left ;
-	margin-left:1rem;
-	margin-right:1rem ;
-}
-div.mdg div.bottom {
-	display:none ;
-	margin-top:0.5rem ;
-	text-align:left ;
-	background-color:#eee ;
-}
-div.mdg .uibase {
-
-}
-div.mdg .joint {
-	cursor: pointer;
-}
-div.mdg  svg path {
-	stroke:#2F2 ;
-	stroke-width:3px ;
-	fill:none ;
-}
-div.mdg  svg {
-	z-index:20;
-}
-div.mdg  svg.e_svg path {
-	stroke:#F22 ;
-}
-div.mdg div.cmenu {
-	position:absolute ;
-	width:10rem ;
-	border:1px solid black ;
-	background-color:#eee;
-	z-index:30;
-}
-div.mdg div.cmenu ul {
-	margin:0 ;
-	padding:0;
-}
-div.mdg div.cmenu li {
-	padding-left:0.5rem ;
-	list-style:none ;
-	cursor: pointer ;
-}
-div.mdg div.cmenu li:hover {
-	background-color:#ccc ;
-}
-div.mdg input,textarea {
-	font-family: monospace ;
-	margin-left:0.5rem ;
-}
-div.mdg input[type=number] {
-	width:5rem ;
 }
 #hbox {
 	display:none ;
@@ -571,6 +207,7 @@ div.mdg input[type=number] {
 	width:8rem ;
 }
 </style>
+<link rel="stylesheet" href="nedit.css" type="text/css" />
 <style id=szoom>
 #base {
 	transform: scale(1.0);	
@@ -608,9 +245,8 @@ zoom:<input type=range id=zoom min=20 max=100 value=100>
 </a-assets>
 
 <!--sample objects-->
-<a-entity id=ebase nodemesh position="0 0.5 0" scale="1 1 1" >
+<a-entity id=ebase nodemesh="" position="0 0.5 0" scale="1 1 1" >
 </a-entity>
-
 <!--camera-->
 <a-entity id="camrig"  position="0 1.6 3" vrheight padmoved> 
 	<a-entity id="camera" camera  look-controls wasd-controls="acceleration:10"></a-entity>

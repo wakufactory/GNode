@@ -4,10 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width">
 <title>GNode runtime sample</title>
-<script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+<script src="aframe.min.js"></script>
 <script src="gnode.js?2"></script>
+<script src="gnode_lib.js?2"></script>
 <script src="afcompo.js"></script>
 <script>
+const $ = (q)=>document.querySelector(q)
 onload = function() {
 	// init GNode
 	GNode.init()
@@ -28,11 +30,41 @@ function loadjson(path) {
 			.catch(err=>resolve(null))
 	})
 }
+	let mode 
+	$('#enterVRButton').addEventListener("mousedown",ev=>{mode="VR"})
+	$('#enterARButton').addEventListener("mousedown",ev=>{mode="AR"})
+	AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
+		if(mode!="AR") return
+		$('a-scene').querySelectorAll('.noar').forEach(o=>{
+			o.setAttribute("visible",false )
+		}) 
+	})
+	AFRAME.scenes[0].addEventListener("exit-vr", ev=>{
+		$('a-scene').querySelectorAll('.noar').forEach(o=>{
+			o.setAttribute("visible",true )
+		}) 
+	})
 }
 </script>
+<style>
+#enterVRButton {
+	position: absolute ;
+	left:calc(50% - 5rem) ;
+	top:90% ;
+	font-size:1.5rem ;
+	width:8rem ;
+}
+#enterARButton {
+	position: absolute ;
+	left:calc(50% + 5rem) ;
+	top:90% ;
+	font-size:1.5rem ;
+	width:8rem ;
+}
+</style>
 <body>
 <!-- A-frame scene -->
-<a-scene>
+<a-scene vr-mode-ui="enterVRButton: #enterVRButton;enterARButton: #enterARButton;">
 
 <a-assets>
   	<img id="floortex" src="https://wakufactory.jp/wxr/assets/img/tex1024.png" crossorigin>
@@ -55,9 +87,10 @@ function loadjson(path) {
 <a-entity light="type: directional; color: #FFF; intensity: 0.6;" position="-0.5 1 1" shadow ></a-entity>
 
 <!--floor-->
-<a-plane position="0 -0.001 0" rotation="-90 0 0" width="200" height="200" color="#888" material="shader:flat;src: #floortex;repeat:20 20;" ></a-plane>
+<a-plane class=noar position="0 -0.001 0" rotation="-90 0 0" width="200" height="200" color="#888" material="shader:flat;src: #floortex;repeat:20 20;" ></a-plane>
 <!--sky-->
-<a-sky  material="shader:flat;color:#66a" radius="100" segments-height="6" segments-width="12"></a-sky>
+<a-sky class=noar material="shader:flat;color:#66a" radius="100" segments-height="6" segments-width="12"></a-sky>
 </a-scene>
-
+<button id=enterVRButton>EnterVR</button>
+<button id=enterARButton>EnterAR</button>
 </body>
