@@ -15,9 +15,10 @@ AFRAME.registerSystem('nodemesh',{
 		this.data = data 
 		let ret = null 
 		for(let [e,p] of this.entry) {
-			let ntree = new GNode.mknode(data) 
-			if(!ret) ret = ntree 
-			e.setnode(ntree)
+			let ntree = GNode.mknode(data) 
+			if(ntree) ret = ntree 
+			else return ret
+			e.setnode(ret)
 		}
 		return ret 
 	}
@@ -40,8 +41,8 @@ AFRAME.registerComponent('nodemesh',{
 		this.mesh = this.ntree.eval(this.data.nodeid)	//eval node
 		console.log(this.mesh)
 		if(this.mesh===null) {
-			if(window.POXA) POXA.log(GNode.emsg)
-			if(window.error) error(GNode.emsg)
+			if(typeof POXA !== 'undefined')POXA.log(GNode.emsg)
+			if(typeof error !== 'undefined') error(GNode.emsg)
 			return false 
 		}
 		for(let i=0;i<this.mesh.length;i++) {
@@ -62,8 +63,8 @@ AFRAME.registerComponent('nodemesh',{
 	tick:function(time,dur) {
 		if(this.mesh===null || this.ntree===null) return 
 		if(this.ntree.eval(this.data.nodeid)===null) {		//eval node per frame
-			if(window.POXA) POXA.log(GNode.emsg)
-			if(window.error) error(GNode.emsg)
+			if(typeof POXA !== 'undefined')POXA.log(GNode.emsg)
+			if(typeof error !== 'undefined') error(GNode.emsg)
 		}
 	}
 })
@@ -127,7 +128,12 @@ loaddata(data) {
 			n.param.output = a 
 		}
 	})
-	this.ntree = document.querySelector('a-scene').systems.nodemesh.setdata(data.nodes)
+	let ret = document.querySelector('a-scene').systems.nodemesh.setdata(data.nodes)
+	if(ret) this.ntree = ret 
+	else {
+		POXA.log(GNode.emsg)
+		return 
+	}
 	if(pos) this.position = pos 
 	this.setntree(this.ntree)
 	console.log(this)	

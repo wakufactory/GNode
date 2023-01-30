@@ -482,7 +482,7 @@ GNode.regist = function(THREE) {
 			} catch(err){ 
 				this.err = err 
 				this.func = null
-//				throw("math function "+err
+//				throw("math function "+err)
 			}
 		},{
 			eval:function(time) {
@@ -728,7 +728,12 @@ GNode.regist = function(THREE) {
 					}
 				)
 				this.dom.value = l.join("\n")
-				function trunc(a){return a.toString().substr(0,5)}
+				function trunc(a){
+					let ret 
+					if(typeof a == 'object') ret = '{'+((a.type)?a.type:"object")+"}"
+					else ret = a.toString().substr(0,5)
+					return ret 
+					}
 			},
 			setui:function() {
 				this.dom = document.createElement('textarea')

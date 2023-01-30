@@ -16,7 +16,6 @@ GNode.createNode = function(type,param,id) {
 		n = new GNode.Nodes[type](param)
 	} catch(err) {
 		GNode.emsg = (`node init error at ${id}(${type}): ${err}`)
-		return null 
 	}
 	n.id = id 
 /*
@@ -34,6 +33,7 @@ GNode.mknode = function(data) {
 	const nt = new GNode.Nodetree()
 	if(nt.addnodes(data)==null) {
 		console.log(GNode.emsg )
+		return null 
 	}
 	return nt 
 }
@@ -162,7 +162,6 @@ GNode.Socket.prototype.setval = function(val) {
 		this.value = val
 	}
 GNode.Socket.prototype.getval = function(sf=false) {
-	
 		return sf?(this.value===null?null:this.value[0]):this.value 
 	}
 GNode.Socket.prototype.setjoint = function(joint) {
@@ -174,6 +173,7 @@ GNode.Socket.prototype.setjoint = function(joint) {
 GNode.Nodetree = function() {
 	this.timestart = new Date().getTime() 
 	this.nodes = {}
+	this.evallog = false 
 }
 GNode.Nodetree.prototype.setnode = function(id,node) {
 	this.nodes[id] = {obj:node,id:id}
@@ -219,7 +219,7 @@ GNode.Nodetree.prototype.addnodes = function(data) {
 		const ni = GNode.createNode(n.nodetype,n.param,n.id)
 		if(!ni) {
 			console.log("node init err "+GNode.emsg)
-//			continue
+			continue 
 		}
 		ni.name = n.name 
 		nodes.push(ni)
@@ -284,6 +284,7 @@ GNode.Nodetree.prototype.eval = function(nodeid) {
 				node._eval(time)
 			}catch(err) {		//catch runtime error
 				GNode.emsg = err 
+				console.log("eval err"+err)
 				return null 
 			} 
 			if(node.result.value!=null) {
