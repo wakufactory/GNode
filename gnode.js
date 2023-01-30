@@ -332,3 +332,76 @@ GNode.noise = function(u,v) {
     return r; 
 }
 
+//***********
+if(typeof AFRAME !=="undefined") {
+// node mesh component
+AFRAME.registerSystem('nodemesh',{
+	init:function() {
+		this.entry = new Map() 
+	},
+	regist:function(compo,p) {
+		this.entry.set(compo,{'param':p})
+//		console.log(this.entry)
+	},
+	unregist:function(compo) {
+		this.entry.delete(compo) 
+	},
+	setdata:function(data) {
+//		console.log(data)
+		this.data = data 
+		let ret = null 
+		for(let [e,p] of this.entry) {
+			let ntree = GNode.mknode(data) 
+			if(ntree) ret = ntree 
+			else return ret
+			e.setnode(ret)
+		}
+		return ret 
+	}
+})
+AFRAME.registerComponent('nodemesh',{
+	schema:{
+		nodeid:{default:""}
+	},
+	init:function() {
+		this.mesh = null
+		this.system.regist(this)
+	},
+	setnode:function(ntree) {
+		this.remove(false)
+		this.ntree = ntree 
+		if(this.ntree ===null) {
+			console.log("Error "+GNode.emsg)
+			return false
+		}
+		this.mesh = this.ntree.eval(this.data.nodeid)	//eval node
+		console.log(this.mesh)
+		if(this.mesh===null) {
+			if(typeof POXA !== 'undefined')POXA.log(GNode.emsg)
+			if(typeof error !== 'undefined') error(GNode.emsg)
+			return false 
+		}
+		for(let i=0;i<this.mesh.length;i++) {
+			this.el.object3D.add(this.mesh[i])			//add mesh to scene
+		}
+		return true 
+	},
+	update:function(old) {
+	},
+	remove:function(f=true) {
+		if(this.mesh==null) return 
+		for(let i=0;i<this.mesh.length;i++)
+			this.el.object3D.remove(this.mesh[i])			//remove from scene	
+		this.mesh = null 
+		this.ntree = null 
+		if(f) this.system.unregist(this)
+	},
+	tick:function(time,dur) {
+		if(this.mesh===null || this.ntree===null) return 
+		if(this.ntree.eval(this.data.nodeid)===null) {		//eval node per frame
+			if(typeof POXA !== 'undefined')POXA.log(GNode.emsg)
+			if(typeof error !== 'undefined') error(GNode.emsg)
+		}
+	}
+})
+}

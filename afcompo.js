@@ -1,5 +1,4 @@
 (function() {
-
 // exit vr by B/Y button 
 AFRAME.registerComponent('exitvr', {
 	init:function() {
