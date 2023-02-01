@@ -48,8 +48,8 @@ GNode.regist = function(THREE) {
 						case "cylinder":
 							let rtop = radius
 							let rbot = radius
-							if(parseFloat(param.radiustop)!=NaN) rtop = param.radiustop
-							if(parseFloat(param.radiusbottom)!=NaN) rbot = param.radiusbottom
+							if(isNaN(parseFloat(param.radiustop))) rtop = param.radiustop
+							if(isNaN(parseFloat(param.radiusbottom))) rbot = param.radiusbottom
 							geometry = new THREE.CylinderGeometry(rtop,rbot,height,segment)
 							break
 						case "capsule":
@@ -58,8 +58,8 @@ GNode.regist = function(THREE) {
 						case "torus":
 							let tube = 0.2 
 							let tubeseg = 64
-							if(parseFloat(param.tuberatio)!=NaN) tube = param.tuberatio
-							if(parseFloat(param.tubeseg)!=NaN) tubeseg = param.tubeseg
+							if(!isNaN(parseFloat(param.tuberatio))) tube = param.tuberatio
+							if(!isNaN(parseFloat(param.tubeseg))) tubeseg = param.tubeseg
 							geometry = new THREE.TorusGeometry(radius,radius*tube,segment,tubeseg)
 							break
 						case "icosa":
@@ -891,11 +891,13 @@ GNode.regist = function(THREE) {
 			this.insock.set('in', new GNode.Socket('in',"I",this,"in","any"))
 			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","any"))
 			this.result = this.outsock.get('out')
+			this.active = false
 		},
 		{
 			"eval":function() {
 				const ins = this.insock.get('in').getval()
 				this.result.setval(ins)
+				if(!this.active) return ;
 				if(!this.dom) return ;
 				let l = []
 				l.push("count:"+ins.length)
@@ -920,7 +922,12 @@ GNode.regist = function(THREE) {
 				this.dom = document.createElement('textarea')
 				this.dom.rows = 10 
 				this.dom.cols = 26
-				return [{name:"val",caption:"",type:"dom",dom:this.dom}]
+				const cb = (e)=>{
+					this.active = e.value.checked
+				}
+				return [
+					{name:"active",caption:"active",type:"checkbox",checked:this.active,callback:cb},
+				{name:"val",caption:"",type:"dom",dom:this.dom}]
 				
 			}
 		}
