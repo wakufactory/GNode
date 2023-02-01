@@ -11,6 +11,7 @@ GNode.regist = function(THREE) {
 			this.insock.set('material', new GNode.Socket('material',"mat",this,"in","material"))
 			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
 			this.outsock.set('vcount', new GNode.Socket('vcount',"vcount",this,"out","scalar"))
+			this.outsock.set('vindex', new GNode.Socket('vindex',"vindex",this,"out","scalar"))
 			this.outsock.set('vertex', new GNode.Socket('vertex',"vertex",this,"out","vec3"))
 			this.outsock.set('vnormal', new GNode.Socket('vnormal',"normal",this,"out","vec3"))
 			this.outsock.set('vuv', new GNode.Socket('vuv',"uv",this,"out","vec2"))
@@ -87,14 +88,17 @@ GNode.regist = function(THREE) {
 				const norm = mesh.geometry.getAttribute('normal').array
 				const uv = mesh.geometry.getAttribute('uv').array 
 				const vi = []
+				const vt = []
 				const ni = [] 
 				const vuv = []
 				for(let i=0;i<vcount;i++) {
-					vi.push([vtx[i*3],vtx[i*3+1],vtx[i*3+2]])
+					vi.push(i)
+					vt.push([vtx[i*3],vtx[i*3+1],vtx[i*3+2]])
 					ni.push([norm[i*3],norm[i*3+1],norm[i*3+2]])
 					vuv.push([uv[i*2],uv[i*2+1]])
 				}
-				this.outsock.get('vertex').setval(vi)	
+				this.outsock.get('vindex').setval(vi)	
+				this.outsock.get('vertex').setval(vt)	
 				this.outsock.get('vnormal').setval(ni)	
 				this.outsock.get('vuv').setval(vuv)	
 			},
@@ -776,6 +780,7 @@ GNode.regist = function(THREE) {
 				} 
 				if(a.length==0) return 
 				const geom = THREE.BufferGeometryUtils.mergeBufferGeometries(a,false) 
+				m1.geometry.dispose()
 				m1.geometry = geom 
 				this.result.setval(m1)
 			}
@@ -914,7 +919,10 @@ GNode.regist = function(THREE) {
 				function trunc(a){
 					let ret 
 					if(typeof a == 'object') ret = '{'+((a.type)?a.type:"object")+"}"
-					else ret = a.toString().substr(0,6)
+					else {
+						if(a<0.00001) a= 0
+						ret = a.toString().substr(0,6)
+					}
 					return ret 
 					}
 			},
