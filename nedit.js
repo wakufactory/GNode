@@ -119,10 +119,13 @@ addnode(param,pos) {
 					const input = document.createElement("input")
 					input.type = ui.type
 					input.value = ui.value
-					input.size = ui.size 
+					if(ui.size) input.size = ui.size 
+					if(ui.checked) input.checked = ui.checked 
 					input.addEventListener("input", ev=>{
+						let val = ev.target.value 
 						if(ui.callback) {
-							ui.callback({key:ui.name,value:ev.target.value})
+							if(ui.type=="checkbox") val = {value:ev.target.value,checked:ev.target.checked}
+							ui.callback({key:ui.name,value:val})
 						}
 					})
 					elem.appendChild(input)					
