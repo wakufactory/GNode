@@ -94,17 +94,19 @@ addnode(param,pos) {
 					elem.appendChild(input)
 				} else if(ui.type=="range") {
 					function round(v) {return v.toString().substr(0,4)}
+					const step = (ui.step)?ui.step-1:1000
 					const input = document.createElement("input")
 					input.type = ui.type
-					input.max = 1000
+					input.max = step
 					input.min = 0 
-					input.value = (ui.value-ui.min)*1000/(ui.max-ui.min)
+					input.value = (ui.value-ui.min)*step/(ui.max-ui.min)
+					
 					const disp = document.createElement('span')
 					disp.className = "rangeview"
 					disp.innerHTML = round(ui.value) 
 					input.addEventListener("input", ev=>{
 						if(ui.callback) {
-							const v = ui.min+(ev.target.value/1000)*(ui.max-ui.min)
+							const v = ui.min+(ev.target.value/step)*(ui.max-ui.min)
 							disp.innerHTML = round(v) 
 							ui.callback({key:ui.name,value:v})
 						}
