@@ -12,20 +12,16 @@ GNode.init = function() {
 //create node instance
 GNode.createNode = function(type,param,id) {
 	let n 
+	if(!GNode.Nodes[type]) {
+		GNode.emsg = "node not exist "+type 
+		return null 
+	}
 	try {
 		n = new GNode.Nodes[type](param)
+		n.id = id 
 	} catch(err) {
 		GNode.emsg = (`node init error at ${id}(${type}): ${err}`)
 	}
-	n.id = id 
-/*
-	if(param && param.default) {
-		for(let v in param.default) {
-			n.insock.get(v).setval(param.default[v])
-		}
-	}
-*/
-//	GNode.nodelist.push(n)
 	return n 
 }
 //make node tree from data
@@ -382,6 +378,8 @@ AFRAME.registerComponent('nodemesh',{
 			return false 
 		}
 		for(let i=0;i<this.mesh.length;i++) {
+			this.mesh[i].castShadow = this.el.components.shadow?.data.cast
+			this.mesh[i].receiveShadow = this.el.components.shadow?.data.receive
 			this.el.object3D.add(this.mesh[i])			//add mesh to scene
 		}
 		return true 
