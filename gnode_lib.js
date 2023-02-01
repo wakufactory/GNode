@@ -8,8 +8,13 @@ GNode.regist = function(THREE) {
 			this.param = param 
 			this.shape = param.shape 
 			if(!this.shape) this.shape ="cube"
-			this.insock.set('material', new GNode.Socket('material',"material",this,"in","material"))
+			this.insock.set('material', new GNode.Socket('material',"mat",this,"in","material"))
 			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
+			this.outsock.set('vcount', new GNode.Socket('vcount',"vcount",this,"out","scalar"))
+			this.outsock.set('vertex', new GNode.Socket('vertex',"vertex",this,"out","vec3"))
+			this.outsock.set('vnormal', new GNode.Socket('vnormal',"normal",this,"out","vec3"))
+			this.outsock.set('vuv', new GNode.Socket('vuv',"uv",this,"out","vec2"))
+
 			this.result = this.outsock.get('mesh')
 		},
 		{
@@ -20,29 +25,31 @@ GNode.regist = function(THREE) {
 					mesh = param.mesh 
 				} else {
 					let geometry 
-					const radius = (param.radius===undefined)?1:param.radius 
-					const segment = (param.segment===undefined)?32:param.segment 
-					let height = (param.height===undefined)?radius*2:param.height
+					const radius = (!parseFloat(param.radius))?1:param.radius 
+					let segment = (!parseInt(param.segment))?32:param.segment 
+					let height = (!parseFloat(param.height))?radius*2:param.height
 					switch(this.shape) {
 						case "plane":
-							geometry = new THREE.PlaneGeometry( radius, radius );
+							segment = (!parseInt(param.segment))?1:param.segment 
+							geometry = new THREE.PlaneGeometry( radius, radius,segment,segment );
 							break ;
 						case "sphere":
 							geometry = new THREE.SphereGeometry( radius,segment,segment/2 );
 							break ;
 						case "cube":
-							geometry = new THREE.BoxGeometry( radius,radius,radius );
+							segment = (!parseInt(param.segment))?1:param.segment 
+							geometry = new THREE.BoxGeometry( radius,radius,radius,segment,segment,segment );
 							break 
 						case "cone":
 							let cheight = radius*2
-							if(param.height!==undefined) rtop = param.height
+							if(!parseFloat(param.height)) rtop = param.height
 							geometry = new THREE.ConeGeometry(radius,cheight,segment)
 							break;
 						case "cylinder":
 							let rtop = radius
 							let rbot = radius
-							if(param.radiustop!==undefined) rtop = param.radiustop
-							if(param.radiusbottom!==undefined) rbot = param.radiusbottom
+							if(parseFloat(param.radiustop)!=NaN) rtop = param.radiustop
+							if(parseFloat(param.radiusbottom)!=NaN) rbot = param.radiusbottom
 							geometry = new THREE.CylinderGeometry(rtop,rbot,height,segment)
 							break
 						case "capsule":
@@ -51,8 +58,8 @@ GNode.regist = function(THREE) {
 						case "torus":
 							let tube = 0.2 
 							let tubeseg = 64
-							if(param.tuberatio!==undefined) tube = param.tuberatio
-							if(param.tubeseg!==undefined) tubeseg = param.tubeseg
+							if(parseFloat(param.tuberatio)!=NaN) tube = param.tuberatio
+							if(parseFloat(param.tubeseg)!=NaN) tubeseg = param.tubeseg
 							geometry = new THREE.TorusGeometry(radius,radius*tube,segment,tubeseg)
 							break
 						case "icosa":
@@ -72,7 +79,24 @@ GNode.regist = function(THREE) {
 					}
 					mesh = new THREE.Mesh( geometry, material );
 				}
-				this.result.setval(mesh)				
+				this.result.setval(mesh)
+				const vertex = mesh.geometry.getAttribute('position')
+				const vcount = vertex.count  
+				this.outsock.get('vcount').setval(vcount)	
+				const vtx = vertex.array 
+				const norm = mesh.geometry.getAttribute('normal').array
+				const uv = mesh.geometry.getAttribute('uv').array 
+				const vi = []
+				const ni = [] 
+				const vuv = []
+				for(let i=0;i<vcount;i++) {
+					vi.push([vtx[i*3],vtx[i*3+1],vtx[i*3+2]])
+					ni.push([norm[i*3],norm[i*3+1],norm[i*3+2]])
+					vuv.push([uv[i*2],uv[i*2+1]])
+				}
+				this.outsock.get('vertex').setval(vi)	
+				this.outsock.get('vnormal').setval(ni)	
+				this.outsock.get('vuv').setval(vuv)	
 			},
 			"setui":function() {
 				const cb = (e) => {
@@ -84,8 +108,10 @@ GNode.regist = function(THREE) {
 						case "radius":
 							this.param.radius = e.value 
 							break ; 
+						case "segment":
+							this.param.segment = e.value 
+							break ; 
 					}
-
 				}
 				const p = [
 					{name:"type",caption:"shape",type:"select",select:[
@@ -100,7 +126,9 @@ GNode.regist = function(THREE) {
 						{name:"octa",value:"octa"},
 						{name:"dodeca",value:"dodeca"}
 						],value:this.param.shape,callback:cb},
-					{name:"radius",caption:"size",type:"number",size:5,value:this.param.radius,callback:cb}
+					{name:"radius",caption:"size",type:"number",size:5,value:this.param.radius,callback:cb},
+					{name:"segment",caption:"segment",type:"number",size:5,value:this.param.segment,callback:cb}
+
 				]
 				return p 
 			}
@@ -115,7 +143,7 @@ GNode.regist = function(THREE) {
 			if(!this.param.color)this.param.color="#fff"
 			if(!this.param.opacity)this.param.opacity=1
 			if(!this.param.side)this.param.side=THREE.FrontSide
-			this.outsock.set('material', new GNode.Socket('material',"material",this,"out","material"))
+			this.outsock.set('material', new GNode.Socket('material',"mat",this,"out","material"))
 //			this.insock['color'] = new GNode.Socket("color",this,"in","vec3")
 		},
 		{
@@ -327,7 +355,6 @@ GNode.regist = function(THREE) {
 				const cb =  e=>{
 					this.param.count = e.value 
 					this.insock.get('count').setval(e.value)
-					this.eval()
 				}
 				return [{name:"count",caption:"count",type:"input",value:this.insock.get('count').getval(true),size:5,callback:cb}]
 			}
@@ -431,6 +458,7 @@ GNode.regist = function(THREE) {
 			for(let n of param.input) {
 				this.insock.set(n.id, new GNode.Socket(n.id,n.id,this,"in",n.type)	)
 			}
+			this.insock.set('sample', new GNode.Socket('sample',"T",this,"in","scalar"))
 
 			const output = []
 			const result = [] 
@@ -484,11 +512,19 @@ GNode.regist = function(THREE) {
 				this.func = null
 //				throw("math function "+err)
 			}
+			this.lasts = NaN
+			this.hold = false 
 		},{
 			eval:function(time) {
 				if(this.func===null) {
 					throw("math init "+this.err)
 					return 
+				}
+				if(this.joints.sample) {
+					const sh = this.insock.get('sample').value[0]
+					this.hold = (sh==this.lasts)
+					if(this.hold) return 
+					this.lasts = sh 
 				}
 				let ic = 0 
 				this.allinput = {"__time":time}
@@ -596,27 +632,41 @@ GNode.regist = function(THREE) {
 			this.param = param
 			this.type = param?.type 
 			if(!this.type) this.type="vec3" 
-			this.insock.set('input', new GNode.Socket('input',"input",this,"in","any",true))
+			this.insock.set('input', new GNode.Socket('input',"input",this,"in","any",false))
 			this.insock.set('initial', new GNode.Socket('initial',"initial",this,"in","any"))
+			this.insock.set('sample', new GNode.Socket('sample',"S&H",this,"in","scalar"))
 			this.outsock.set('result', new GNode.Socket('result',"result",this,"out","any"))
 			this.result = this.outsock.get('result')
 			this.vstack = null
+			this.lasts = NaN
+			this.hold = false 
 		},
 		{
 			"eval":function(v) {
-				let out 
-				if(this.vstack!==null) out = this.vstack.map(a=>{return Array.isArray(a)?Array(...a):a})
-				else {
+				if(this.vstack==null) {
+					let out 
 					if(this.insock.get('initial').value) {
 						out =this.insock.get('initial').value	
 					}	
-					else out = this.type=="vec3"?[[0,0,0]]:[0] 			
+					else out = this.type=="vec3"?[[0,0,0]]:[0] 
+					this.outsock.get('result').value = out
+					return 
 				}
+				if(this.joints.sample) {
+					const sh = this.insock.get('sample').value[0]
+					this.hold = (sh==this.lasts)
+					if(this.hold) return 
+					this.lasts = sh 
+				}
+				let out 
+				out = this.vstack.map(a=>{return Array.isArray(a)?Array(...a):a})
 				this.outsock.get('result').value = out
 			},
 			"posteval":function() {
+				if(this.hold) return 
 				if(!this.joints.input) return 
 				const v = this.joints.input?.value
+				if(!v) return 
 				this.insock.get('input').value = v 
 //				this.vstack = structuredClone(v)	
 				this.vstack = v.map(a=>{return Array.isArray(a)?new Array(...a):a})
@@ -627,12 +677,12 @@ GNode.regist = function(THREE) {
 	GNode.registerNode("MeshMatrix",
 		function(param) {
 			this.nodetype = "MeshMatrix"
-			this.insock.set('mesh', new GNode.Socket('mesh',"mesh",this,"in","instance"))
+			this.insock.set('mesh', new GNode.Socket('mesh',"mesh",this,"in","mesh"))
 			this.insock.set('scale', new GNode.Socket('scale',"scale",this,"in","vec3"))
 			this.insock.set('euler', new GNode.Socket('euler',"euler",this,"in","vec3"))
 			this.insock.set('matrix', new GNode.Socket('matrix',"matrix",this,"in","mat4"))
 			this.insock.set('translate', new GNode.Socket('translate',"translate",this,"in","vec3"))
-			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","instance"))
+			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
 			this.result = this.outsock.get('mesh') 
 		},
 		{
@@ -691,11 +741,116 @@ GNode.regist = function(THREE) {
 			}
 		}
 	)
+	GNode.registerNode("MergeMesh",
+		function(param) {
+			this.nodetype = "MergeMesh"
+			this.insock.set('mesh1', new GNode.Socket('mesh1',"mesh1",this,"in","mesh"))
+			this.insock.set('mesh2', new GNode.Socket('mesh2',"mesh2",this,"in","mesh"))
+			this.insock.set('mesh3', new GNode.Socket('mesh3',"mesh3",this,"in","mesh"))
+			this.insock.set('mesh4', new GNode.Socket('mesh4',"mesh4",this,"in","mesh"))
+			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
+			this.result = this.outsock.get('mesh')
+		},
+		{
+			"eval":function() {
+				const a = [] 
+				let m1 = this.insock.get('mesh1').getval(true) 
+				if(m1) {
+					m1.updateMatrix()
+					a.push(m1.geometry.applyMatrix4(m1.matrix)) 
+				}
+				let m = this.insock.get('mesh2').getval(true) 
+				if(m) {
+					m.updateMatrix()
+					a.push(m.geometry.applyMatrix4(m.matrix)) 
+				} 
+				m = this.insock.get('mesh3').getval(true) 
+				if(m) {
+					m.updateMatrix()
+					a.push(m.geometry.applyMatrix4(m.matrix)) 
+				} 
+				m = this.insock.get('mesh4').getval(true) 
+				if(m) {
+					m.updateMatrix()
+					a.push(m.geometry.applyMatrix4(m.matrix)) 
+				} 
+				if(a.length==0) return 
+				const geom = THREE.BufferGeometryUtils.mergeBufferGeometries(a,false) 
+				m1.geometry = geom 
+				this.result.setval(m1)
+			}
+		}
+	)
+	GNode.registerNode("GeometryVertex",
+		function(param) {
+			this.nodetype = "GeometryVertex"
+			this.insock.set('mesh', new GNode.Socket('mesh',"mesh",this,"in","instance"))
+			this.insock.set('vertex', new GNode.Socket('vertex',"vertex",this,"in","vec3"))
+			this.insock.set('normal', new GNode.Socket('normal',"normal",this,"in","vec3"))
+			this.insock.set('uv', new GNode.Socket('uv',"uv",this,"in","vec2"))
+			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
+			this.result = this.outsock.get('mesh') 
+		},
+		{
+			"eval":function() {			
+				let mesh = this.insock.get('mesh').getval(true)
+				const geom = mesh.geometry
+				const pos = geom.getAttribute("position")
+				const norm = geom.getAttribute("normal")
+				const uv = geom.getAttribute("uv")
+				
+				const inv = this.insock.get('vertex').getval()
+				const inn = this.insock.get('normal').getval()
+				const inu = this.insock.get('uv').getval()
+
+				let aidx = 0 
+				const parray = pos.array 
+				const narray = norm.array 
+				const uarray = uv.array 
+				for(let i=0;i<pos.count;i++) {
+					if(inv) {
+						const v = inv[i]
+						parray[aidx] = v[0]
+						parray[aidx+1] = v[1]
+						parray[aidx+2] = v[2]					
+					}
+					if(inn) {
+						const n = inn[i]
+						narray[aidx] = n[0]
+						narray[aidx+1] = n[1]
+						narray[aidx+2] = n[2]
+					}
+					if(inu) {
+						const u = inu[i]
+						uarray[aidx] = u[0]
+						uarray[aidx+1] = u[1]				
+					}
+					aidx += pos.itemSize 
+				}
+				if(inv) {
+					pos.needsUpdate = true
+					pos.setUsage(THREE.DynamicDrawUsage)
+				}
+				if(inn) {
+					norm.needsUpdate = true
+					norm.setUsage(THREE.DynamicDrawUsage)
+				}
+				if(inu) {
+					uv.needsUpdate = true
+					uv.setUsage(THREE.DynamicDrawUsage)
+				}
+				if(!inn && inv) geom.computeVertexNormals()
+				this.result.setval(mesh)
+			}	
+		}
+	)
+
+
 	GNode.registerNode("Hub",
 		function(param) {
 			this.nodetype = "Hub"
-			this.insock.set('in', new GNode.Socket('in',"I",this,"in","mesh"))
-			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","mesh"))
+			this.insock.set('in', new GNode.Socket('in',"I",this,"in","any"))
+			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","any"))
 			this.result = this.outsock.get('out')
 		},
 		{
@@ -704,11 +859,37 @@ GNode.regist = function(THREE) {
 			}
 		}
 	)
+	GNode.registerNode("Switch",
+		function(param={}) {
+			this.nodetype = "Switch"
+			if(!param.select) param.select = 1
+			this.param = param
+			this.insock.set('in1', new GNode.Socket('in1',"I1",this,"in","any"))
+			this.insock.set('in2', new GNode.Socket('in2',"I2",this,"in","any"))
+			this.insock.set('in3', new GNode.Socket('in3',"I3",this,"in","any"))
+			this.insock.set('in4', new GNode.Socket('in4',"I4",this,"in","any"))
+			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","any"))
+			this.result = this.outsock.get('out')
+			this.num = this.param.select 
+		},
+		{
+			"eval":function() {
+				this.result.setval(this.insock.get('in'+this.num).getval())
+			},
+			setui:function() {
+				const cb = (e)=> {
+					this.num = e.value 
+					if(this.param) this.param.select = e.value 
+				}
+				return [{name:"select",type:"range",caption:"select", min:1,max:4,step:4,value:this.param.select,callback:cb}]
+			}
+		}
+	)
 	GNode.registerNode("Inspect",
 		function(param) {
 			this.nodetype = "Inspect"
-			this.insock.set('in', new GNode.Socket('in',"I",this,"in","mesh"))
-			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","mesh"))
+			this.insock.set('in', new GNode.Socket('in',"I",this,"in","any"))
+			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","any"))
 			this.result = this.outsock.get('out')
 		},
 		{
@@ -731,14 +912,14 @@ GNode.regist = function(THREE) {
 				function trunc(a){
 					let ret 
 					if(typeof a == 'object') ret = '{'+((a.type)?a.type:"object")+"}"
-					else ret = a.toString().substr(0,5)
+					else ret = a.toString().substr(0,6)
 					return ret 
 					}
 			},
 			setui:function() {
 				this.dom = document.createElement('textarea')
 				this.dom.rows = 10 
-				this.dom.cols = 25 
+				this.dom.cols = 26
 				return [{name:"val",caption:"",type:"dom",dom:this.dom}]
 				
 			}

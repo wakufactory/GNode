@@ -23,7 +23,10 @@ constructor(base) {
 			{disp:"InstanceColor",id:"InstColor"},
 			{disp:"MeshMatrix",id:"MeshMatrix"},
 			{disp:"MeshGroup",id:"MeshGroup"},
+			{disp:"MergeMesh",id:"MergeMesh"},
+			{disp:"GeometryVertex",id:"GeometryVertex"},
 			{disp:"Hub",id:"Hub"},
+			{disp:"Switch",id:"Switch"},
 			{disp:"Output",id:"Output"},
 			{disp:"Inspect",id:"Inspect"}	
 		]	
@@ -65,8 +68,7 @@ loaddata(data) {
 	}
 	if(pos) this.position = pos 
 	this.setntree(this.ntree)
-	console.log(this)	
-	
+	console.log(this.ntree)	
 }
 getsavedata() {
 		const nd = this.ntree.serialize()
@@ -74,16 +76,14 @@ getsavedata() {
 }
 reload() {
 	const nd = this.ntree.serialize()
-	console.log(nd)
 	this.nodeedit.clear()
 	this.ntree = document.querySelector('a-scene').systems.nodemesh.setdata(nd)
 	if(this.ntree==null) {
 			console.log(GNode.emsg)
 			return false 
 	}
-	console.log(this.ntree.nodes)
-		
 	this.setntree(this.ntree)
+	console.log(this.ntree.nodes)
 	return true 
 }
 //
@@ -189,9 +189,12 @@ newnode(type,pos) {
 		"Output":{nodetype:"Output"},
 		"MeshMatrix":{nodetype:"MeshMatrix"},
 		"MeshGroup":{nodetype:"MeshGroup"},
+		"MergeMesh":{nodetype:"MergeMesh",param:{evalonce:true}},
+		"GeometryVertex":{nodetype:"GeometryVertex"},
 		"Hub":{nodetype:"Hub"},
+		"Switch":{nodetype:"Switch"},
 		"Inspect":{nodetype:"Inspect"},
-		"AFEntity":{nodetype:"AFEntity",param:{evalonce:true}}
+		"AFEntity":{nodetype:"AFEntity",param:{query:"",evalonce:true}}
 	}
 	let id = "node"+this.nc
 	while(this.ntree.getnode(id)) {
