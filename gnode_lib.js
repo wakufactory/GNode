@@ -142,11 +142,12 @@ GNode.regist = function(THREE) {
 		function(param={}) {
 			this.nodetype = "Material"
 			this.param = param 
-			if(!this.param.roughness)this.param.roughness=0.5
-			if(!this.param.metalness)this.param.metalness=0.5
-			if(!this.param.color)this.param.color="#fff"
-			if(!this.param.opacity)this.param.opacity=1
-			if(!this.param.side)this.param.side=THREE.FrontSide
+			if(this.param.roughness==undefined)this.param.roughness=0.5
+			if(this.param.metalness==undefined)this.param.metalness=0.5
+			if(this.param.color==undefined)this.param.color="#fff"
+			if(this.param.opacity==undefined)this.param.opacity=1
+			if(this.param.side==undefined)this.param.side=THREE.FrontSide
+			if(this.param.flat==undefined) this.param.flat = false 
 			this.outsock.set('material', new GNode.Socket('material',"mat",this,"out","material"))
 //			this.insock['color'] = new GNode.Socket("color",this,"in","vec3")
 		},
@@ -158,6 +159,7 @@ GNode.regist = function(THREE) {
 				this.material.opacity = this.param.opacity
 				this.material.transparent = (this.param.opacity!=1) 
 				this.material.side = parseInt(this.param.side )
+				this.material.flatShading = this.param.flat
 			},
 			"setui":function() {
 				const cb = (e) => {
@@ -182,6 +184,10 @@ GNode.regist = function(THREE) {
 						this.param.side = e.value 
 						this.material.side = e.value 
 					}
+					if(e.key=="flat") {
+						this.param.flat = e.value.checked 
+						this.material.flatShading = this.param.flat
+					}
 				}
 				const p = [
 					{name:"roughness",callback:cb,caption:"R",type:"range",min:0,max:1,value:this.param.roughness},
@@ -192,7 +198,8 @@ GNode.regist = function(THREE) {
 						{name:"front",value:THREE.FrontSide},
 						{name:"back",value:THREE.BackSide},
 						{name:"both",value:THREE.DoubleSide}
-					],value:this.param.side}
+					],value:this.param.side},
+					{name:"flat",callback:cb,caption:"Flat ",type:"checkbox",checked:this.param.flat}
 				]
 				return p
 			}
@@ -484,8 +491,14 @@ GNode.regist = function(THREE) {
 
 			const fc = `
 				"use strict" 
-				const [PI,PI2,RAD,DEG,Time,sin,cos,tan,atan2,random,floor,ceil,fract,pow,sqrt,hypot,abs,sign,min,max,mix,clamp,step,smoothstep,noise]=
-					[Math.PI,Math.PI*2,Math.PI/180,180/Math.PI,allinput.__time,Math.sin,Math.cos,Math.tan,Math.atan2,Math.random,Math.floor,Math.ceil,(a)=>a-Math.floor(x),Math.pow,Math.sqrt,Math.hypot,Math.abs,Math.sign,Math.min,Math.max,(x,y,a)=>x(1-a)+y*a,(x,a,b)=>Math.min(Math.max(x, a), b),(a,x)=>(x<a)?0:1,(e0,e1,x)=>{let xx=(x-e0)/(e1-e0);xx=Math.max(0,Math.min(1,xx));return xx*xx*(3-2*xx)},GNode.noise]
+				const [PI,PI2,RAD,DEG,Time,sin,cos,tan,atan2,floor,ceil,fract,pow,sqrt,hypot,abs,sign,min,max,noise]=
+					[Math.PI,Math.PI*2,Math.PI/180,180/Math.PI,allinput.__time,Math.sin,Math.cos,Math.tan,Math.atan2,Math.floor,Math.ceil,(a)=>a-Math.floor(x),Math.pow,Math.sqrt,Math.hypot,Math.abs,Math.sign,Math.min,Math.max,GNode.noise]
+				const mix = (x,y,a)=>x(1-a)+y*a
+				const clamp = (x,a,b)=>Math.min(Math.max(x, a), b)
+				const step = (a,x)=>(x<a)?0:1
+				const smoothstep = (e0,e1,x)=>{let xx=(x-e0)/(e1-e0);xx=Math.max(0,Math.min(1,xx));return xx*xx*(3-2*xx)}
+				const random = (s=0,e=1)=>Math.random()*(e-s)+s
+
 				function getidx(n,i) {
 					let v = allinput[n]
 					if(Array.isArray(v)) v = (v.length<__ic)?v[i%v.length]:v[i]
@@ -657,7 +670,7 @@ GNode.regist = function(THREE) {
 					return 
 				}
 				if(this.joints.sample) {
-					const sh = this.insock.get('sample').value[0]
+					const sh = this.insock.get('sample').getval(true)
 					this.hold = (sh==this.lasts)
 					if(this.hold) return 
 					this.lasts = sh 
