@@ -25,6 +25,7 @@ constructor(base) {
 			{disp:"MeshGroup",id:"MeshGroup"},
 			{disp:"MergeMesh",id:"MergeMesh"},
 			{disp:"GeometryVertex",id:"GeometryVertex"},
+			{disp:"Wireframe",id:"Wireframe"},
 			{disp:"Hub",id:"Hub"},
 			{disp:"Switch",id:"Switch"},
 			{disp:"Output",id:"Output"},
@@ -156,7 +157,7 @@ newnode(type,pos) {
 		"Input":{
 			nodetype:"Input",
 			param:{
-				input:[{id:"result",caption:"input",value:0,min:0,max:1}]
+				input:[{id:"result",caption:"result",value:0,min:0,max:1}]
 			}
 		},
 		"Math_s":{
@@ -191,6 +192,7 @@ newnode(type,pos) {
 		"MeshGroup":{nodetype:"MeshGroup"},
 		"MergeMesh":{nodetype:"MergeMesh",param:{evalonce:true}},
 		"GeometryVertex":{nodetype:"GeometryVertex"},
+		"Wireframe":{nodetype:"Wireframe"},
 		"Hub":{nodetype:"Hub"},
 		"Switch":{nodetype:"Switch"},
 		"Inspect":{nodetype:"Inspect"},

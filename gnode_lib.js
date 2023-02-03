@@ -512,8 +512,10 @@ GNode.regist = function(THREE) {
 				}
 				let __result = {${result.join(",")}}
 				let __c ;
+				const A = allinput 
 				${initcode}
 				for(let index=0;index<__ic;index++) {
+					const I=index 
 					{
 							${args.join("\n")}
 							${precode};
@@ -659,6 +661,9 @@ GNode.regist = function(THREE) {
 			this.hold = false 
 		},
 		{
+			"reload":function() {
+				this.vstack = null 
+			},
 			"eval":function(v) {
 				if(this.vstack==null) {
 					let out 
@@ -766,6 +771,11 @@ GNode.regist = function(THREE) {
 			this.insock.set('mesh3', new GNode.Socket('mesh3',"mesh3",this,"in","mesh"))
 			this.insock.set('mesh4', new GNode.Socket('mesh4',"mesh4",this,"in","mesh"))
 			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
+			this.outsock.set('vcount', new GNode.Socket('vcount',"vcount",this,"out","scalar"))
+			this.outsock.set('vindex', new GNode.Socket('vindex',"vindex",this,"out","scalar"))
+			this.outsock.set('vertex', new GNode.Socket('vertex',"vertex",this,"out","vec3"))
+			this.outsock.set('vnormal', new GNode.Socket('vnormal',"normal",this,"out","vec3"))
+			this.outsock.set('vuv', new GNode.Socket('vuv',"uv",this,"out","vec2"))
 			this.result = this.outsock.get('mesh')
 		},
 		{
@@ -796,6 +806,26 @@ GNode.regist = function(THREE) {
 				m1.geometry.dispose()
 				m1.geometry = geom 
 				this.result.setval(m1)
+				const vertex = m1.geometry.getAttribute('position')
+				const vcount = vertex.count  
+				this.outsock.get('vcount').setval(vcount)	
+				const vtx = vertex.array 
+				const norm = m1.geometry.getAttribute('normal').array
+				const uv = m1.geometry.getAttribute('uv').array 
+				const vi = []
+				const vt = []
+				const ni = [] 
+				const vuv = []
+				for(let i=0;i<vcount;i++) {
+					vi.push(i)
+					vt.push([vtx[i*3],vtx[i*3+1],vtx[i*3+2]])
+					ni.push([norm[i*3],norm[i*3+1],norm[i*3+2]])
+					vuv.push([uv[i*2],uv[i*2+1]])
+				}
+				this.outsock.get('vindex').setval(vi)	
+				this.outsock.get('vertex').setval(vt)	
+				this.outsock.get('vnormal').setval(ni)	
+				this.outsock.get('vuv').setval(vuv)	
 			}
 		}
 	)
@@ -816,30 +846,33 @@ GNode.regist = function(THREE) {
 				const pos = geom.getAttribute("position")
 				const norm = geom.getAttribute("normal")
 				const uv = geom.getAttribute("uv")
-				
+console.log(pos)				
 				const inv = this.insock.get('vertex').getval()
 				const inn = this.insock.get('normal').getval()
 				const inu = this.insock.get('uv').getval()
 
 				let aidx = 0 
 				const parray = pos.array 
-				const narray = norm.array 
-				const uarray = uv.array 
+				const narray = norm!==undefined?norm.array:null
+				const uarray = uv!==undefined?uv.array:null
 				for(let i=0;i<pos.count;i++) {
-					if(inv) {
+					if(inv && parray) {
 						const v = inv[i]
+						console.log(v)
 						parray[aidx] = v[0]
 						parray[aidx+1] = v[1]
 						parray[aidx+2] = v[2]					
 					}
-					if(inn) {
+					if(inn && narray) {
 						const n = inn[i]
+						console.log(n)
 						narray[aidx] = n[0]
 						narray[aidx+1] = n[1]
 						narray[aidx+2] = n[2]
 					}
-					if(inu) {
+					if(inu && uarray) {
 						const u = inu[i]
+						console.log(u)
 						uarray[aidx] = u[0]
 						uarray[aidx+1] = u[1]				
 					}
@@ -849,11 +882,11 @@ GNode.regist = function(THREE) {
 					pos.needsUpdate = true
 					pos.setUsage(THREE.DynamicDrawUsage)
 				}
-				if(inn) {
+				if(inn && norm) {
 					norm.needsUpdate = true
 					norm.setUsage(THREE.DynamicDrawUsage)
 				}
-				if(inu) {
+				if(inu && uv) {
 					uv.needsUpdate = true
 					uv.setUsage(THREE.DynamicDrawUsage)
 				}
@@ -877,6 +910,42 @@ GNode.regist = function(THREE) {
 			}
 		}
 	)
+	
+		GNode.registerNode("Wireframe",
+		function(param={}) {
+			this.nodetype = "Wireframe"
+			this.param = param 
+			if(this.param.line==undefined) this.param.line = 1 
+			if(this.param.color==undefined) this.param.color = "#fff"
+			this.insock.set('mesh', new GNode.Socket('mesh',"mesh",this,"in","mesh"))
+			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
+			this.result = this.outsock.get('mesh') 
+		},
+		{
+			"eval":function() {	
+				const material = new THREE.LineBasicMaterial( {
+					color: new THREE.Color( this.param.color) ,
+					linewidth: parseInt(this.param.line),
+					linecap: 'round', //ignored by WebGLRenderer
+					linejoin:  'round' //ignored by WebGLRenderer
+				})
+				const wireframe = new THREE.WireframeGeometry( this.insock.get('mesh').getval(true).geometry );
+				const line = new THREE.LineSegments( wireframe,material )
+				this.outsock.get('mesh').setval(line)
+			},
+			"setui":function() {
+				const cb = (ev)=>{
+					if(ev.key=="color") this.param.color = ev.value 
+					if(ev.key=="line") this.param.line = ev.value 
+				}
+				return[
+					{name:"line",caption:"lsize",type:"number",size:3,value:this.param.line,callback:cb},
+					{name:"color",caption:"color",type:"input",size:5,value:this.param.color,callback:cb},
+					]
+			}
+		}
+	)
+		
 	GNode.registerNode("Switch",
 		function(param={}) {
 			this.nodetype = "Switch"
