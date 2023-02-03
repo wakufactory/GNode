@@ -276,12 +276,12 @@ GNode.regist = function(THREE) {
 			},
 			"setui":function() {
 				const cb = e=>{
-					this.setval(e.key,e.value/100)
+					this.setval(e.key,e.value)
 				}
 				const p = []
 				for(let k of this.input) {
 					const max = (k.max===undefined)?1:k.max
-					p.push({name:k.id,type:"range",caption:k.caption, min:0,max:100,value:k.value/max*100,callback:cb})
+					p.push({name:k.id,type:"range",caption:k.caption, min:0,max:1,step:100,value:k.value/max,callback:cb})
 				}
 				return p 
 			}
@@ -513,6 +513,7 @@ GNode.regist = function(THREE) {
 				let __result = {${result.join(",")}}
 				let __c ;
 				const A = allinput 
+				const L = lastdata
 				${initcode}
 				for(let index=0;index<__ic;index++) {
 					const I=index 
