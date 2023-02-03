@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width">
 <title>GNode runtime sample</title>
-<script src="aframe.min.js"></script>
+<script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
 <script src="gnode.js?2"></script>
 <script src="gnode_lib.js?2"></script>
 <script src="afcompo.js"></script>
@@ -24,17 +24,20 @@ onload = function() {
 		// set a-frame component
 		document.getElementById('ebase').components.nodemesh.setnode(ntree)
 	})
-function loadjson(path) {
-	return new Promise((resolve,reject)=>{
-		fetch(path)
-			.then(response => response.json())
-			.then(data => resolve(data))
-			.catch(err=>resolve(null))
-	})
-}
+	function loadjson(path) {
+		return new Promise((resolve,reject)=>{
+			fetch(path)
+				.then(response => response.json())
+				.then(data => resolve(data))
+				.catch(err=>resolve(null))
+		})
+	}
 	let mode 
 	$('#enterVRButton').addEventListener("mousedown",ev=>{mode="VR"})
 	$('#enterARButton').addEventListener("mousedown",ev=>{mode="AR"})
+	if(document.querySelector('a-scene').hasLoaded) setaf()
+	else document.querySelector('a-scene').addEventListener("loaded",setaf)
+	function setaf() {
 	AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
 		if(mode!="AR") return
 		$('a-scene').querySelectorAll('.noar').forEach(o=>{
@@ -46,6 +49,7 @@ function loadjson(path) {
 			o.setAttribute("visible",true )
 		}) 
 	})
+	}
 }
 </script>
 <style>
