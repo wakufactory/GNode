@@ -167,9 +167,9 @@ GNode.Socket.prototype.setjoint = function(joint) {
 
 //******* class Nodetree
 GNode.Nodetree = function() {
-	this.timestart = new Date().getTime() 
 	this.nodes = {}
 	this.evallog = false 
+	this.timestart = new Date().getTime() 
 }
 GNode.Nodetree.prototype.setnode = function(id,node) {
 	this.nodes[id] = {obj:node,id:id}
@@ -182,6 +182,14 @@ GNode.Nodetree.prototype.getnode = function(id) {
 }
 GNode.Nodetree.prototype.evalnode = function(id) {
 	this.nodes[id].obj.doeval = true
+}
+GNode.Nodetree.prototype.cleareval = function() {
+	for(let n in this.nodes) {
+		this.nodes[n].obj.evaled = false 
+		this.nodes[n].obj.doeval = true 
+		if(this.nodes[n].obj.reload) this.nodes[n].obj.reload()
+	}
+	this.timestart = new Date().getTime() 
 }
 GNode.Nodetree.prototype.removenode = function(id) {
 	const node = this.getnode(id)
@@ -329,6 +337,8 @@ GNode.noise = function(u,v) {
 }
 
 //***********
+// regist AFRAME component 
+
 if(typeof AFRAME !=="undefined") {
 // node mesh component
 AFRAME.registerSystem('nodemesh',{
@@ -362,6 +372,17 @@ AFRAME.registerComponent('nodemesh',{
 	init:function() {
 		this.mesh = null
 		this.system.regist(this)
+		this.el.addEventListener("reload", ev=>{
+			this.ntree.cleareval()
+			this.setnode(this.ntree) 
+		})
+		this.el.addEventListener("setNodeAttribute", ev=>{
+			if(!this.ntree) return 
+			const p = ev.detail
+			const node = this.ntree.getnode(p.nodeid)
+			if(!node) return 
+			if(node.setval!==undefined) node.setval(p.attr,p.value) 			
+		})
 	},
 	setnode:function(ntree) {
 		this.remove(false)
