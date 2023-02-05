@@ -417,7 +417,7 @@ GNode.regist = function(THREE) {
 						mtx.premultiply(mtx1.makeRotationFromEuler(new THREE.Euler(...get(ine,i))))
 					}
 					if(inq) {
-						mtx.premultiply(mtx1.makeRotationFromQuaternion (new THREE.Quaternion(...get(inq,i))))
+						mtx.premultiply(mtx1.makeRotationFromQuaternion (new THREE.Quaternion(...get(inq,i)).normalize()))
 					}
 					if(intr) {
 						mtx.premultiply(mtx2.makeTranslation(...get(intr,i)))
@@ -465,7 +465,7 @@ GNode.regist = function(THREE) {
 			let initcode = (param.initcode)?param.initcode:""
 			if(Array.isArray(precode)) precode = precode.join("\n")
 			if(Array.isArray(initcode)) initcode = initcode.join("\n")
-			this.lastdata = [] 
+			this.lastdata = 0
 			for(let n of param.input) {
 				this.insock.set(n.id, new GNode.Socket(n.id,n.id,this,"in",n.type)	)
 			}
@@ -513,7 +513,6 @@ GNode.regist = function(THREE) {
 				let __result = {${result.join(",")}}
 				let __c ;
 				const A = allinput 
-				const L = lastdata
 				${initcode}
 				for(let index=0;index<__ic;index++) {
 					const I=index 
@@ -843,11 +842,13 @@ GNode.regist = function(THREE) {
 		{
 			"eval":function() {			
 				let mesh = this.insock.get('mesh').getval(true)
+//				mesh.updateMatrix()
+//				mesh.geometry.applyMatrix4(mesh.matrix)
+//				mesh.matrix = new THREE.Matrix4() 
 				const geom = mesh.geometry
 				const pos = geom.getAttribute("position")
 				const norm = geom.getAttribute("normal")
-				const uv = geom.getAttribute("uv")
-console.log(pos)				
+				const uv = geom.getAttribute("uv")		
 				const inv = this.insock.get('vertex').getval()
 				const inn = this.insock.get('normal').getval()
 				const inu = this.insock.get('uv').getval()
@@ -859,21 +860,21 @@ console.log(pos)
 				for(let i=0;i<pos.count;i++) {
 					if(inv && parray) {
 						const v = inv[i]
-						console.log(v)
+//						console.log(v)
 						parray[aidx] = v[0]
 						parray[aidx+1] = v[1]
 						parray[aidx+2] = v[2]					
 					}
 					if(inn && narray) {
 						const n = inn[i]
-						console.log(n)
+//						console.log(n)
 						narray[aidx] = n[0]
 						narray[aidx+1] = n[1]
 						narray[aidx+2] = n[2]
 					}
 					if(inu && uarray) {
 						const u = inu[i]
-						console.log(u)
+//						console.log(u)
 						uarray[aidx] = u[0]
 						uarray[aidx+1] = u[1]				
 					}
@@ -1003,7 +1004,7 @@ console.log(pos)
 					let ret 
 					if(typeof a == 'object') ret = '{'+((a.type)?a.type:"object")+"}"
 					else {
-						if(a<0.00001) a= 0
+						if(Math.abs(a)<0.00001) a= 0
 						ret = a.toString().substr(0,6)
 					}
 					return ret 
