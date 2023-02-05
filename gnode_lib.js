@@ -448,8 +448,8 @@ GNode.regist = function(THREE) {
 				const hsl = this.insock.get('hsl').getval()
 				const col = new THREE.Color()
 				for(let i=0;i<ini.count;i++) {
-					if(rgb) col.setRGB(...(rgb[i]))
-					else if(hsl) col.setHSL(...(hsl[i]))
+					if(rgb) col.setRGB(...(rgb[i%rgb.length]))
+					else if(hsl) col.setHSL(...(hsl[i%hsl.length]))
 					ini.setColorAt(i,col)
 				}
 				this.result.setval(ini)	
@@ -492,7 +492,7 @@ GNode.regist = function(THREE) {
 			const fc = `
 				"use strict" 
 				const [PI,PI2,RAD,DEG,Time,sin,cos,tan,atan2,floor,ceil,fract,pow,sqrt,hypot,abs,sign,min,max,noise]=
-					[Math.PI,Math.PI*2,Math.PI/180,180/Math.PI,allinput.__time,Math.sin,Math.cos,Math.tan,Math.atan2,Math.floor,Math.ceil,(a)=>a-Math.floor(x),Math.pow,Math.sqrt,Math.hypot,Math.abs,Math.sign,Math.min,Math.max,GNode.noise]
+					[Math.PI,Math.PI*2,Math.PI/180,180/Math.PI,allinput.__time,Math.sin,Math.cos,Math.tan,Math.atan2,Math.floor,Math.ceil,(a)=>a-Math.floor(a),Math.pow,Math.sqrt,Math.hypot,Math.abs,Math.sign,Math.min,Math.max,GNode.noise]
 				const mix = (x,y,a)=>x(1-a)+y*a
 				const clamp = (x,a,b)=>Math.min(Math.max(x, a), b)
 				const step = (a,x)=>(x<a)?0:1
@@ -836,6 +836,7 @@ GNode.regist = function(THREE) {
 			this.insock.set('vertex', new GNode.Socket('vertex',"vertex",this,"in","vec3"))
 			this.insock.set('normal', new GNode.Socket('normal',"normal",this,"in","vec3"))
 			this.insock.set('uv', new GNode.Socket('uv',"uv",this,"in","vec2"))
+			this.insock.set('color', new GNode.Socket('color',"color",this,"in","vec3"))
 			this.outsock.set('mesh', new GNode.Socket('mesh',"mesh",this,"out","mesh"))
 			this.result = this.outsock.get('mesh') 
 		},
@@ -848,15 +849,29 @@ GNode.regist = function(THREE) {
 				const geom = mesh.geometry
 				const pos = geom.getAttribute("position")
 				const norm = geom.getAttribute("normal")
-				const uv = geom.getAttribute("uv")		
+				const uv = geom.getAttribute("uv")	
+				let  col = geom.getAttribute("color")		
 				const inv = this.insock.get('vertex').getval()
 				const inn = this.insock.get('normal').getval()
 				const inu = this.insock.get('uv').getval()
-
+				const icol = this.insock.get('color').getval()
+				if(icol && !col) {
+					const isize = icol[0].length 
+					col = new THREE.Float32BufferAttribute(new Float32Array(pos.count*isize),isize)
+					col.setUsage(THREE.DynamicDrawUsage)
+					geom.setAttribute("color",col)
+					mesh.material.vertexColors = true 
+					if(isize==4) mesh.material.transparent = true 
+				}
+				
 				let aidx = 0 
+				let uidx = 0
+				let cidx = 0
 				const parray = pos.array 
 				const narray = norm!==undefined?norm.array:null
 				const uarray = uv!==undefined?uv.array:null
+				const carray = col!==undefined?col.array:null
+
 				for(let i=0;i<pos.count;i++) {
 					if(inv && parray) {
 						const v = inv[i]
@@ -875,8 +890,18 @@ GNode.regist = function(THREE) {
 					if(inu && uarray) {
 						const u = inu[i]
 //						console.log(u)
-						uarray[aidx] = u[0]
-						uarray[aidx+1] = u[1]				
+						uarray[uidx] = u[0]
+						uarray[uidx+1] = u[1]	
+						uidx += uv.itemSize 			
+					}
+					if(icol && carray) {
+						const n = icol[i]
+//						console.log(n)
+						carray[cidx] = n[0]
+						carray[cidx+1] = n[1]
+						carray[cidx+2] = n[2]		
+						if(n[3]!==undefined) carray[cidx+3] = n[3]	
+						cidx += col.itemSize				
 					}
 					aidx += pos.itemSize 
 				}
@@ -891,6 +916,9 @@ GNode.regist = function(THREE) {
 				if(inu && uv) {
 					uv.needsUpdate = true
 					uv.setUsage(THREE.DynamicDrawUsage)
+				}
+				if(icol && col) {
+					col.needsUpdate = true
 				}
 				if(!inn && inv) geom.computeVertexNormals()
 				this.result.setval(mesh)
