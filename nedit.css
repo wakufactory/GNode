@@ -2,6 +2,8 @@
 div.mdg {
 	position:relative ;
 	box-sizing:border-box;
+	background-color:#000 ;
+	color:#fff ;
 }
 div.mdg svg {
 	position:absolute ;
@@ -12,13 +14,13 @@ div.mdg svg {
 }
 div.mdg .box {
 	position:absolute ;
-	border:2px solid black ;
-	background-color:white;
+	border:2px solid #ccc ;
 	line-height:1.5em ;
 	padding:0.25em;
 	box-sizing:border-box;
 	cursor:move;
 	user-select: none;
+	background-color:#222 ;
 }
 div.mdg .box:hover {
 	z-index:10;	
@@ -51,11 +53,11 @@ div.mdg div.body {
 }
 div.mdg div.right {
 	text-align: right ;
-	background-color: #ddd;
+	background-color: #111;
 }
 div.mdg div.left {
 	text-align:left ;
-	background-color: #ddd;
+	background-color: #111;
 }
 div.mdg div.mid {
 	text-align:left ;
@@ -66,7 +68,7 @@ div.mdg div.bottom {
 	display:none ;
 	margin-top:0.5rem ;
 	text-align:left ;
-	background-color:#eee ;
+	background-color:#111 ;
 }
 div.mdg .uibase {
 
@@ -88,8 +90,8 @@ div.mdg  svg.e_svg path {
 div.mdg div.cmenu {
 	position:absolute ;
 	width:10rem ;
-	border:1px solid black ;
-	background-color:#eee;
+	border:1px solid #888 ;
+	background-color:#222;
 	z-index:30;
 }
 div.mdg div.cmenu ul {
@@ -103,11 +105,11 @@ div.mdg div.cmenu li {
 	display: block;
 }
 div.mdg div.cmenu li:hover {
-	background-color:#ccc ;
+	background-color:#555 ;
 }
-div.mdg input,textarea {
-	color:black ;
-	background-color:white ;
+div.mdg input,textarea,select {
+	color:#fff ;
+	background-color:#111 ;
 	font-family: monospace ;
 	margin-left:0.5rem ;
 }

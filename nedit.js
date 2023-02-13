@@ -118,15 +118,20 @@ addnode(param,pos) {
 				} else {
 					const input = document.createElement("input")
 					input.type = ui.type
-					input.value = ui.value
+					input.value = (ui.value===undefined)?"":ui.value
 					if(ui.size) input.size = ui.size 
 					if(ui.checked) input.checked = ui.checked 
 					input.addEventListener("input", ev=>{
 						let val = ev.target.value 
+						$('itext').value = ev.target.value
 						if(ui.callback) {
 							if(ui.type=="checkbox") val = {value:ev.target.value,checked:ev.target.checked}
 							ui.callback({key:ui.name,value:val})
 						}
+					})
+					input.addEventListener("focus", ev=>{
+							this.selectedtext = ev.target
+							$('itext').value = ev.target.value
 					})
 					elem.appendChild(input)					
 				}
@@ -325,7 +330,12 @@ setevent() {
 	base.querySelectorAll('.box .menu').forEach(o=>{
 		o.addEventListener("click", this.f_nodemenu)
 	})
-
+	$('itext').addEventListener("input", ev=>{
+		if(this.selectedtext) {
+			this.selectedtext.value = ev.target.value 
+			this.selectedtext.dispatchEvent(new Event("input"))
+		}
+	})
 }	
 addnodeevnt(nodebox) {
 	nodebox.addEventListener("mousedown",this.f_clickbox)
@@ -341,11 +351,6 @@ addnodeevnt(nodebox) {
 		o.addEventListener("touchend",this.f_jup)
 	})
 	nodebox.querySelector('.menu').addEventListener("click", this.f_nodemenu)
-	nodebox.querySelectorAll('input').forEach(o=>{
-		o.addEventListener("focus", ev=>{
-			console.log(ev.target.type+":"+ev.target.parentNode.id)
-		})
-	})
 }
 setcmenu(cmenu) {
 	this.cmenu = new CMenu(this.base,cmenu)
