@@ -2,6 +2,8 @@
 // Copyright 2022 wakufactory 
 // License:MIT
 
+// export {NEdit} 
+
 const $$ = id=>document.querySelector(id)
 
 function dlog(msg) {
@@ -123,16 +125,18 @@ addnode(param,pos) {
 					if(ui.checked) input.checked = ui.checked 
 					input.addEventListener("input", ev=>{
 						let val = ev.target.value 
-						$('itext').value = ev.target.value
+						if($$('#itext')) $$('#itext').value = ev.target.value
 						if(ui.callback) {
 							if(ui.type=="checkbox") val = {value:ev.target.value,checked:ev.target.checked}
 							ui.callback({key:ui.name,value:val})
 						}
 					})
-					input.addEventListener("focus", ev=>{
+					if($$('#itext')) {
+						input.addEventListener("focus", ev=>{
 							this.selectedtext = ev.target
-							$('itext').value = ev.target.value
-					})
+							$$('#itext').value = ev.target.value
+						})
+					}
 					elem.appendChild(input)					
 				}
 				el.querySelector("div.uibase").appendChild(elem)	
@@ -330,12 +334,14 @@ setevent() {
 	base.querySelectorAll('.box .menu').forEach(o=>{
 		o.addEventListener("click", this.f_nodemenu)
 	})
-	$('itext').addEventListener("input", ev=>{
+	if($$('#itext')) {
+	$$('#itext').addEventListener("input", ev=>{
 		if(this.selectedtext) {
 			this.selectedtext.value = ev.target.value 
 			this.selectedtext.dispatchEvent(new Event("input"))
 		}
 	})
+	}
 }	
 addnodeevnt(nodebox) {
 	nodebox.addEventListener("mousedown",this.f_clickbox)

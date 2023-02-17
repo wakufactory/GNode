@@ -26,7 +26,12 @@ onload = function() {
 		// load nodetata and create nodetree
 		const data = await loaddata()
 		console.log(data)
-		nedit.loaddata(data)	
+		let ntree = document.querySelector('a-scene').systems.nodemesh.setdata(data.nodes)
+		if(!ntree) {
+			POXA.log(GNode.emsg)
+			return 
+		}
+		nedit.loaddata(data,ntree)	
 		AFRAME.scenes[0].addEventListener("enter-vr", ev=>{
 			if(mode!="AR") return
 			$$('a-scene').querySelectorAll('.noar').forEach(o=>{
@@ -47,7 +52,13 @@ onload = function() {
 	})
 	
 	$$('#reload').addEventListener("click", ev=>{
-		nedit.reload()
+		const data = nedit.getsavedata()
+		let ntree = document.querySelector('a-scene').systems.nodemesh.setdata(data.nodes)
+		if(!ntree) {
+			console.log(GNode.emsg)
+			return 
+		}
+		nedit.reload(ntree)
 	})
 	$$('#save').addEventListener("click", ev=>{
 		const sd = nedit.getsavedata()
@@ -168,7 +179,7 @@ html,body {
 	font-family:sans-serif;
 	background-color:#666 ;
 	transform-origin:0 0 ;
-	color:black ;
+	color:white ;
 }
 #emsg { 
 	height:3rem ;

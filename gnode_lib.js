@@ -1021,12 +1021,14 @@ GNode.regist = function(THREE) {
 			this.insock.set('in2', new GNode.Socket('in2',"I2",this,"in","any"))
 			this.insock.set('in3', new GNode.Socket('in3',"I3",this,"in","any"))
 			this.insock.set('in4', new GNode.Socket('in4',"I4",this,"in","any"))
+//			this.insock.set('sw', new GNode.Socket('sw',"SW",this,"in","scalar"))
 			this.outsock.set('out', new GNode.Socket('out',"O",this,"out","any"))
 			this.result = this.outsock.get('out')
 			this.num = this.param.select 
 		},
 		{
 			"eval":function() {
+//			const in = floor(this.insock.get('sw').getval())
 				this.result.setval(this.insock.get('in'+this.num).getval())
 			},
 			setui:function() {
