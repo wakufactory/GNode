@@ -15,6 +15,7 @@ constructor(base) {
 			{disp:"Math(s)",id:"Math_s"},
 			{disp:"Math(v3)",id:"Math_v3"},
 			{disp:"Math(v4)",id:"Math_v4"},
+			{disp:"Math(nl)",id:"Math_nl"},
 			{disp:"Latch",id:"Latch"},
 			{disp:"Mesh",id:"Mesh"},
 			{disp:"Material",id:"Material"},
@@ -179,6 +180,17 @@ newnode(type,pos) {
 			param:{
 				input:[{id:"a",type:"scalar"},{id:"b",type:"scalar"},{id:"c",type:"scalar"},{id:"d",type:"scalar"}],
 				output:[{id:"result",type:"vec4",value:["0","0","0","0"]}]
+			}
+		},
+		"Math_nl":{
+			nodetype:"Math",
+			param:{
+				noloop:true,
+				input:[{id:"a",type:"scalar"},{id:"b",type:"scalar"},{id:"c",type:"scalar"},{id:"d",type:"scalar"}],
+				output:[{id:"A",type:"vec3",value:["0","0","0"]},
+							{id:"B",type:"vec3",value:["0","0","0"]},
+						{id:"C",type:"vec3",value:["0","0","0"]},
+					{id:"D",type:"vec3",value:["0","0","0"]}]
 			}
 		},
 		"Latch":{nodetype:"Latch",param:{evalonce:false}},

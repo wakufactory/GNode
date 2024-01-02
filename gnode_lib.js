@@ -465,6 +465,7 @@ GNode.regist = function(THREE) {
 			let initcode = (param.initcode)?param.initcode:""
 			if(Array.isArray(precode)) precode = precode.join("\n")
 			if(Array.isArray(initcode)) initcode = initcode.join("\n")
+			let noloop = param.noloop==true 
 			this.lastdata = 0
 			for(let n of param.input) {
 				this.insock.set(n.id, new GNode.Socket(n.id,n.id,this,"in",n.type)	)
@@ -513,7 +514,13 @@ GNode.regist = function(THREE) {
 				let __result = {${result.join(",")}}
 				let __c ;
 				const A = allinput 
+			`+(noloop?
+			`	let result = __result 
 				${initcode}
+				return result 
+			`
+			:
+			`	${initcode}
 				for(let index=0;index<__ic;index++) {
 					const I=index 
 					{
@@ -523,7 +530,8 @@ GNode.regist = function(THREE) {
 					}
 				}
 				return __result 
-			`
+			`)
+//if(noloop) console.log(fc) 
 			try{
 				this.func = new Function("__ic","allinput","lastdata",fc)
 			} catch(err){ 
@@ -571,6 +579,17 @@ GNode.regist = function(THREE) {
 			},
 			setui:function() {
 				const ret = [] 
+				if(this.param.noloop) {
+					const el = document.createElement("textarea") 
+					el.setAttribute("rows",5)
+					el.setAttribute("cols",40)
+					el.value = this.param.initcode 
+					el.addEventListener("input",ev=>{
+						this.param.initcode = ev.target.value 
+					})
+					ret.push({caption:"",elem:el})	
+					return ret 	
+				}
 				const o = this.param.output.find(o=>o.id=="result") 
 				if(o.type=="scalar")
 					ret.push(
