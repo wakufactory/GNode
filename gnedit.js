@@ -35,58 +35,20 @@ constructor(base) {
 	})
 }
 // load and create new nodethree 
-loaddata(data) {
+loaddata(data,ntree) {
 	this.joints = []
 	this.position = {}
 	this.nodeedit.clear()	
-	const pos = data.pos 
-	
-	// for back compati
-	data.nodes.forEach(n=>{
-		if(n.param && n.param.input && !Array.isArray(n.param.input)) {
-			const a = []
-			for(let k in n.param.input) {
-				const p = n.param.input[k]
-				p.id = k 
-				a.push(p)
-			} 
-			n.param.input = a 
-		}
-		if(n.param && n.param.output && !Array.isArray(n.param.output)) {
-			const a = []
-			for(let k in n.param.output) {
-				const p = n.param.output[k]
-				p.id = k 
-				a.push(p)
-			} 
-			n.param.output = a 
-		}
-	})
-	let ret = document.querySelector('a-scene').systems.nodemesh.setdata(data.nodes)
-	if(ret) this.ntree = ret 
-	else {
-		POXA.log(GNode.emsg)
-		return 
-	}
-	if(pos) this.position = pos 
-	this.setntree(this.ntree)
-	console.log(this.ntree)	
+	if(data.pos ) this.position = data.pos  
+	this.setntree(ntree)
 }
 getsavedata() {
-		const nd = this.ntree.serialize()
-		return {gnode:"0.1",pos:this.position,nodes:nd} 	
-}
-reload() {
 	const nd = this.ntree.serialize()
+	return {gnode:"0.1",pos:this.position,nodes:nd} 	
+}
+reload(ntree) {
 	this.nodeedit.clear()
-	this.ntree = document.querySelector('a-scene').systems.nodemesh.setdata(nd)
-	if(this.ntree==null) {
-			console.log(GNode.emsg)
-			return false 
-	}
-	this.setntree(this.ntree)
-	console.log(this.ntree.nodes)
-	return true 
+	this.setntree(ntree)
 }
 //
 addnode(node) {
@@ -149,7 +111,7 @@ setntree(ntree) {
 
 // add new node 
 newnode(type,pos) {
-	this.nc++
+	if(!this.ntree) this.ntree = GNode.mknode(null)
 	const newnode = {
 		"Value":{
 			nodetype:"Value",
@@ -210,14 +172,15 @@ newnode(type,pos) {
 		"Inspect":{nodetype:"Inspect"},
 		"AFEntity":{nodetype:"AFEntity",param:{query:"",evalonce:true}}
 	}
+	this.nc++
 	let id = "node"+this.nc
 	while(this.ntree.getnode(id)) {
 		this.nc++ 
 		id = "node"+this.nc 
 	}
-	const nodeparam = newnode[type]
-	if(!nodeparam) return 
-	nodeparam.id = id 
+	let nodeparam = newnode[type]
+	if(!nodeparam) nodeparam = {"nodetype":type}
+	nodeparam.id = id
 	nodeparam.name = id 
 	console.log(nodeparam)
 	const nodes = this.ntree.addnodes([nodeparam])

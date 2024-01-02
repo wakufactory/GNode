@@ -19,10 +19,8 @@ onload = function() {
 	loadjson("samples/gn_templ.json?1").then(data=>{
 		//make node tree
 		console.log(data)
-		const ntree = GNode.mknode(data.nodes)	
-		console.log(ntree)	
 		// set a-frame component
-		document.getElementById('ebase').components.nodemesh.setnode(ntree)
+		document.querySelector('a-scene').systems.nodemesh.setdata(data.nodes)
 	})
 	function loadjson(path) {
 		return new Promise((resolve,reject)=>{

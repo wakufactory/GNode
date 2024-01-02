@@ -6,11 +6,10 @@
 const GNode ={}
 GNode.init = function() {
 	GNode.Nodes = {}		//all defined nodes
-	GNode.nodelist = [] //node instances
 }
 
 //create node instance
-GNode.createNode = function(type,param,id) {
+GNode.createNode = function(tree,type,param,id) {
 	let n 
 	if(!GNode.Nodes[type]) {
 		GNode.emsg = "node not exist "+type 
@@ -19,6 +18,7 @@ GNode.createNode = function(type,param,id) {
 	try {
 		n = new GNode.Nodes[type](param)
 		n.id = id 
+		n.nodetree = tree 
 	} catch(err) {
 		GNode.emsg = (`node init error at ${id}(${type}): ${err}`)
 	}
@@ -27,15 +27,11 @@ GNode.createNode = function(type,param,id) {
 //make node tree from data
 GNode.mknode = function(data) {
 	const nt = new GNode.Nodetree()
-	if(nt.addnodes(data)==null) {
+	if(data!=null && nt.addnodes(data)==null) {
 		console.log(GNode.emsg )
 		return null 
 	}
 	return nt 
-}
-// clear eval flag
-GNode.clearEval = function() {
-	for(let i in GNode.nodelist) GNode.nodelist[i].evaled = false 
 }
 //register new node 
 GNode.registerNode = function(type,prot,methods) {
@@ -65,12 +61,14 @@ GNode.Node =
 		this.doeval = true 
 		this.evalonce = false 
 		this.evaltrig = false
+		this.evalcount = 0
 		if(param) {
 			this.param = param 
 			if(param.evalonce!==undefined) this.evalonce = param.evalonce 
 		}
 		this.insock.set("_eval",new GNode.Socket("_eval","_eval",this,"in","bool"))
 	}
+	
 
 // add joint name to socket 
 GNode.Node.prototype.addjoint = function(name,socket) {
@@ -113,6 +111,7 @@ GNode.Node.prototype._eval = function(time) {
 			throw(`node eval error at ${this.name}: ${err}`)
 			return null 
 		}
+		this.evalcount++ 
 		return true
 	}
 // get input values
@@ -170,6 +169,7 @@ GNode.Nodetree = function() {
 	this.nodes = {}
 	this.evallog = false 
 	this.timestart = new Date().getTime() 
+	this.funcs = []
 }
 GNode.Nodetree.prototype.setnode = function(id,node) {
 	this.nodes[id] = {obj:node,id:id}
@@ -187,6 +187,7 @@ GNode.Nodetree.prototype.cleareval = function() {
 	for(let n in this.nodes) {
 		this.nodes[n].obj.evaled = false 
 		this.nodes[n].obj.doeval = true 
+		this.nodes[n].obj.evalcount = 0 
 		if(this.nodes[n].obj.reload) this.nodes[n].obj.reload()
 	}
 	this.timestart = new Date().getTime() 
@@ -211,7 +212,7 @@ GNode.Nodetree.prototype.jointnode = function(in_id,out_id) {
 	return true 
 }
 GNode.Nodetree.prototype.removejoint = function(in_id) {
-	console.log("remove joint "+in_id)
+//	console.log("remove joint "+in_id)
 	this.getnode(in_id[0])?.removejoint(in_id[1])
 }
 // addnodes from data
@@ -220,7 +221,7 @@ GNode.Nodetree.prototype.addnodes = function(data) {
 	const nodes = []
 	for(let i=0;i<data.length;i++) {
 		const n = data[i]
-		const ni = GNode.createNode(n.nodetype,n.param,n.id)
+		const ni = GNode.createNode(this,n.nodetype,n.param,n.id)
 		if(!ni) {
 			console.log("node init err "+GNode.emsg)
 			continue 
@@ -310,6 +311,9 @@ GNode.Nodetree.prototype.eval = function(nodeid) {
 	return result 
 }
 
+GNode.Nodetree.prototype.registerFunction =function(fname,func) {
+	this.funcs[fname] = func 
+}
 //***************
 // utils
 GNode.noise = function(u,v) {
@@ -360,6 +364,7 @@ AFRAME.registerSystem('nodemesh',{
 			let ntree = GNode.mknode(data) 
 			if(ntree) ret = ntree 
 			else return ret
+//			console.log("make ntree")
 			e.setnode(ret)
 		}
 		return ret 
@@ -383,6 +388,7 @@ AFRAME.registerComponent('nodemesh',{
 			if(!node) return 
 			if(node.setval!==undefined) node.setval(p.attr,p.value) 			
 		})
+//		console.log("nodemesh init")
 	},
 	setnode:function(ntree) {
 		this.remove(false)
@@ -392,6 +398,7 @@ AFRAME.registerComponent('nodemesh',{
 			return false
 		}
 		this.mesh = this.ntree.eval(this.data.nodeid)	//eval node
+//		console.log("eval")
 		console.log(this.mesh)
 		if(this.mesh===null) {
 			if(typeof POXA !== 'undefined')POXA.log(GNode.emsg)

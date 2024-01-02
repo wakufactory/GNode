@@ -15,26 +15,26 @@
     },
     "node4": {
       "pos": [
-        872.6216216216217,
-        21.64864864864865
+        936,
+        17
       ]
     },
     "node5": {
       "pos": [
-        1266,
-        244
+        1366,
+        249
       ]
     },
     "node6": {
       "pos": [
-        1263,
-        27
+        1342,
+        20
       ]
     },
     "node7": {
       "pos": [
-        18,
-        200
+        13,
+        154
       ]
     },
     "node8": {
@@ -51,8 +51,8 @@
     },
     "node10": {
       "pos": [
-        875,
-        235
+        920,
+        240
       ]
     },
     "node11": {
@@ -63,14 +63,20 @@
     },
     "node13": {
       "pos": [
-        36,
-        416
+        25,
+        374
       ]
     },
     "node14": {
       "pos": [
         37,
-        600
+        556
+      ]
+    },
+    "node12": {
+      "pos": [
+        865.974358974359,
+        496.7948717948718
       ]
     }
   },
@@ -128,7 +134,7 @@
       "param": {},
       "joint": {
         "instance": "node4.instance",
-        "hsl": "node10.result"
+        "hsl": "node12.A"
       }
     },
     {
@@ -353,6 +359,74 @@
         ]
       },
       "joint": {}
+    },
+    {
+      "id": "node12",
+      "nodetype": "Math",
+      "name": "node12",
+      "param": {
+        "noloop": true,
+        "input": [
+          {
+            "id": "a",
+            "type": "scalar"
+          },
+          {
+            "id": "b",
+            "type": "scalar"
+          },
+          {
+            "id": "c",
+            "type": "scalar"
+          },
+          {
+            "id": "d",
+            "type": "scalar"
+          }
+        ],
+        "output": [
+          {
+            "id": "A",
+            "type": "vec3",
+            "value": [
+              "0",
+              "0",
+              "0"
+            ]
+          },
+          {
+            "id": "B",
+            "type": "vec3",
+            "value": [
+              "0",
+              "0",
+              "0"
+            ]
+          },
+          {
+            "id": "C",
+            "type": "vec3",
+            "value": [
+              "0",
+              "0",
+              "0"
+            ]
+          },
+          {
+            "id": "D",
+            "type": "vec3",
+            "value": [
+              "0",
+              "0",
+              "0"
+            ]
+          }
+        ],
+        "initcode": "for(let i=0;i<allinput['a'].length;i++) {\n  result['A'][i] = [getidx('a',i),0.5,0.6]\n}"
+      },
+      "joint": {
+        "a": "node2.findex"
+      }
     }
   ]
 }

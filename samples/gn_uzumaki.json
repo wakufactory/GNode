@@ -3,20 +3,14 @@
   "pos": {
     "node1": {
       "pos": [
-        41,
-        24
+        34,
+        12
       ]
     },
     "node2": {
       "pos": [
         378,
         22
-      ]
-    },
-    "node3": {
-      "pos": [
-        81,
-        243
       ]
     },
     "node4": {
@@ -39,20 +33,20 @@
     },
     "node7": {
       "pos": [
-        50,
-        113
+        33,
+        196
       ]
     },
     "node8": {
       "pos": [
-        412,
-        509
+        411,
+        534
       ]
     },
     "node9": {
       "pos": [
-        379,
-        223
+        385,
+        198
       ]
     },
     "node10": {
@@ -69,14 +63,14 @@
     },
     "node13": {
       "pos": [
-        25,
-        374
+        50,
+        405
       ]
     },
     "node14": {
       "pos": [
         37,
-        556
+        594
       ]
     }
   },
@@ -98,22 +92,13 @@
         "evalonce": true,
         "default": {
           "count": 10
-        }
+        },
+        "count": "200"
       },
       "joint": {
         "mesh": "node1.mesh",
-        "count": "node3.result",
         "material": "node7.material"
       }
-    },
-    {
-      "id": "node3",
-      "nodetype": "Value",
-      "name": "countvalue",
-      "param": {
-        "value": "200"
-      },
-      "joint": {}
     },
     {
       "id": "node4",
@@ -152,7 +137,11 @@
       "name": "material",
       "param": {
         "roughness": 0.693,
-        "metalness": 0.175
+        "metalness": 0.175,
+        "color": "#fff",
+        "opacity": 1,
+        "side": 0,
+        "flat": false
       },
       "joint": {}
     },
@@ -161,30 +150,35 @@
       "nodetype": "Math",
       "name": "position",
       "param": {
-        "input": {
-          "a": {
-            "type": "scalar"
+        "input": [
+          {
+            "type": "scalar",
+            "id": "a"
           },
-          "b": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "b"
           },
-          "c": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "c"
           },
-          "d": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "d"
           }
-        },
-        "output": {
-          "result": {
+        ],
+        "output": [
+          {
             "type": "vec3",
             "value": [
               "sin(b*a)*a",
               "cos(b*a)*a+1",
               "0"
-            ]
+            ],
+            "id": "result"
           }
-        }
+        ]
       },
       "joint": {
         "a": "node2.findex",
@@ -196,30 +190,35 @@
       "nodetype": "Math",
       "name": "scale",
       "param": {
-        "input": {
-          "a": {
-            "type": "scalar"
+        "input": [
+          {
+            "type": "scalar",
+            "id": "a"
           },
-          "b": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "b"
           },
-          "c": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "c"
           },
-          "d": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "d"
           }
-        },
-        "output": {
-          "result": {
+        ],
+        "output": [
+          {
             "type": "vec3",
             "value": [
               "0.1",
               "0.1",
               "0.1"
-            ]
+            ],
+            "id": "result"
           }
-        }
+        ]
       },
       "joint": {
         "a": "node2.findex"
@@ -230,30 +229,35 @@
       "nodetype": "Math",
       "name": "color",
       "param": {
-        "input": {
-          "a": {
-            "type": "scalar"
+        "input": [
+          {
+            "type": "scalar",
+            "id": "a"
           },
-          "b": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "b"
           },
-          "c": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "c"
           },
-          "d": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "d"
           }
-        },
-        "output": {
-          "result": {
+        ],
+        "output": [
+          {
             "type": "vec3",
             "value": [
               "a",
               "0.8",
               "0.5"
-            ]
+            ],
+            "id": "result"
           }
-        }
+        ]
       },
       "joint": {
         "a": "node2.findex"
@@ -264,30 +268,35 @@
       "nodetype": "Math",
       "name": "rotation",
       "param": {
-        "input": {
-          "a": {
-            "type": "scalar"
+        "input": [
+          {
+            "type": "scalar",
+            "id": "a"
           },
-          "b": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "b"
           },
-          "c": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "c"
           },
-          "d": {
-            "type": "scalar"
+          {
+            "type": "scalar",
+            "id": "d"
           }
-        },
-        "output": {
-          "result": {
+        ],
+        "output": [
+          {
             "type": "vec3",
             "value": [
               "0",
               "0",
               "0"
-            ]
+            ],
+            "id": "result"
           }
-        }
+        ]
       },
       "joint": {
         "a": "node2.findex",
@@ -299,26 +308,31 @@
       "nodetype": "Math",
       "name": "timebase",
       "param": {
-        "input": {
-          "a": {
-            "type": "scalar"
-          },
-          "b": {
-            "type": "scalar"
-          },
-          "c": {
-            "type": "scalar"
-          },
-          "d": {
-            "type": "scalar"
-          }
-        },
-        "output": {
-          "result": {
+        "input": [
+          {
             "type": "scalar",
-            "value": "Time/100*a"
+            "id": "a"
+          },
+          {
+            "type": "scalar",
+            "id": "b"
+          },
+          {
+            "type": "scalar",
+            "id": "c"
+          },
+          {
+            "type": "scalar",
+            "id": "d"
           }
-        }
+        ],
+        "output": [
+          {
+            "type": "scalar",
+            "value": "Time/100*a",
+            "id": "result"
+          }
+        ]
       },
       "joint": {
         "a": "node14.result"
@@ -329,14 +343,15 @@
       "nodetype": "Input",
       "name": "speed",
       "param": {
-        "input": {
-          "result": {
+        "input": [
+          {
             "caption": "input",
             "value": 0.528,
             "min": 0,
-            "max": 1
+            "max": 1,
+            "id": "result"
           }
-        }
+        ]
       },
       "joint": {}
     }
